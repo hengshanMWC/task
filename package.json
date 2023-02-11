@@ -6,13 +6,13 @@
     "packages/*"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/hengshanMWC/monorepo-template#readme",
+  "homepage": "https://github.com/hengshanMWC/task#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hengshanMWC/monorepo-template.git"
+    "url": "git+https://github.com/hengshanMWC/task.git"
   },
   "bugs": {
-    "url": "https://github.com/hengshanMWC/monorepo-template/issues"
+    "url": "https://github.com/hengshanMWC/task/issues"
   },
   "scripts": {
     "release": "esno ./scripts/release",

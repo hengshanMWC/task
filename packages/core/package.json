@@ -1,19 +1,18 @@
 {
-  "name": "demo",
+  "name": "@task/core",
   "version": "0.0.1",
-  "description": "demo",
+  "description": "task",
   "author": "mawencan",
   "license": "MIT",
-  "homepage": "https://github.com/hengshanMWC/monorepo-template#readme",
+  "homepage": "https://github.com/hengshanMWC/task#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hengshanMWC/monorepo-template.git"
+    "url": "git+https://github.com/hengshanMWC/task.git"
   },
   "bugs": {
-    "url": "https://github.com/hengshanMWC/monorepo-template/issues"
+    "url": "https://github.com/hengshanMWC/task/issues"
   },
-  "main": "dist/demo.umd.js",
-  "module": "dist/demo.mjs",
+  "main": "dist/index.mjs",
   "types": "typings",
   "scripts": {
     "type": "tsc --emitDeclarationOnly --declarationDir typings",
