@@ -2,9 +2,6 @@ import type { BaseTask, TaskStatus } from './core'
 import { CurrentPromise } from './core'
 export abstract class Task extends CurrentPromise implements BaseTask {
   status: TaskStatus = 'idle'
-  constructor() {
-    super()
-  }
 
   start(...params: any): Promise<any> {
     return this.createPromiseSingleton(...params).currentPromise as Promise<any>
@@ -17,6 +14,10 @@ export abstract class Task extends CurrentPromise implements BaseTask {
 
   cancel() {
     return this.clear()
+  }
+
+  reset() {
+    return this.cancel().start()
   }
 
   clear() {

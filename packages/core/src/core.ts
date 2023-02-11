@@ -6,6 +6,7 @@ export interface BaseTask {
   start: (...params: any) => Promise<any>
   pause: (...params: any) => this
   cancel: (...params: any) => this
+  reset: (...params: any) => Promise<any>
 }
 export class CurrentPromise {
   protected currentPromise?: Promise<any>
