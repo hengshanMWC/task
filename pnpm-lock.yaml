@@ -44,12 +44,6 @@ importers:
       vitepress: 1.0.0-alpha.29_@types+node@18.11.18
       vitest: 0.26.3
 
-  packages/base:
-    specifiers:
-      '@task/core': workspace:^0.0.1
-    dependencies:
-      '@task/core': link:../core
-
   packages/core:
     specifiers: {}
 
