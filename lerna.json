@@ -1,5 +1,5 @@
 {
-  "version": "0.1.6",
+  "version": "0.0.0",
   "npmClient": "pnpm",
   "useWorkspaces": true,
   "packages": [
@@ -13,11 +13,7 @@
       "message": "chore(release): publish"
     },
     "publish": {
-      "npmClient": "npm",
-      "allowBranch": [
-        "main",
-        "refactor/plugin"
-      ]
+      "npmClient": "npm"
     }
   }
 }
