@@ -3,7 +3,6 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 import validateNpmPackageName from 'validate-npm-package-name'
-import commonjs from 'vite-plugin-commonjs'
 import { pascalCase } from 'change-case'
 import { name } from './package.json'
 const moduleName = name
@@ -22,9 +21,6 @@ export default defineConfig({
       name: pascalCase(moduleName),
     },
   },
-  plugins: [
-    commonjs(),
-  ],
   test: {
     threads: false, // process.chdir() is not supported in workers
     globals: true,
