@@ -20,7 +20,6 @@ importers:
       typescript: ^4.5.5
       validate-npm-package-name: ^5.0.0
       vite: ^3.2.4
-      vite-plugin-commonjs: ^0.6.1
       vitepress: 1.0.0-alpha.29
       vitest: ^0.26.3
     devDependencies:
@@ -40,7 +39,6 @@ importers:
       typescript: 4.9.4
       validate-npm-package-name: 5.0.0
       vite: 3.2.5_@types+node@18.11.18
-      vite-plugin-commonjs: 0.6.1
       vitepress: 1.0.0-alpha.29_@types+node@18.11.18
       vitest: 0.26.3
 
@@ -7051,12 +7049,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
-
-  /vite-plugin-commonjs/0.6.1:
-    resolution: {integrity: sha512-UtWqZen2CpbJziFmYRH6fkTew3ExHcIKpB0uLVF8TVGAL0wVTyr6V+TRqWzFyX069u/yWr/AZfYDQCX+Rx34iw==}
-    dependencies:
-      fast-glob: 3.2.12
     dev: true
 
   /vite/3.2.5_@types+node@18.11.18:
