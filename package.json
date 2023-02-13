@@ -18,7 +18,7 @@
     "release": "esno ./scripts/release",
     "build": "lerna run build",
     "version": "lerna version",
-    "publish": "lerna publish from-git --force-publish=* --no-git-tag-version --no-push --yes",
+    "publish": "lerna publish --access public",
     "test": "lerna run test",
     "test:cov": "lerna run test:cov",
     "lint": "eslint --ext=js,ts,json,md,tsx .",
