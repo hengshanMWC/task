@@ -3,8 +3,9 @@ import { Task } from './task'
 
 export class TaskList extends Task {
   status: TaskStatus = 'idle'
-  protected maxSync = 1
   taskList: BaseTask[] = []
+  protected maxSync = 1
+
   constructor(maxSync: number) {
     super()
     this.setMaxSync(maxSync)
@@ -56,18 +57,7 @@ export class TaskList extends Task {
   }
 
   pause(value?: valuesType) {
-    const list: BaseTask[] = []
-    if (value === undefined) {
-      list.push(...this.prepareTaskList)
-    }
-    else {
-      list.push(
-        ...this.getTasks(value).filter(task =>
-          this.prepareTaskList.includes(task),
-        ),
-      )
-    }
-    this.executePause(list)
+    this.getTargetTaskList(this.prepareTaskList, value).forEach(task => task.pause())
     if (this.resetStatus().status === 'pause') {
       return this
     }
@@ -77,24 +67,21 @@ export class TaskList extends Task {
   }
 
   cancel(value?: valuesType) {
-    const list: BaseTask[] = []
-    if (value === undefined) {
-      list.push(...this.taskList)
-    }
-    else {
-      list.push(
-        ...this.getTasks(value).filter(task =>
-          this.taskList.includes(task),
-        ),
-      )
-    }
-    this.executeCancel(list)
-    if (this.resetStatus().status === 'idle') {
+    this.getTargetTaskList(this.taskList, value).forEach((task) => {
+      this.pop(task)
+      task.cancel()
+    })
+    if (this.resetStatus('end').status === 'end') {
       return this.clear()
     }
     else {
       return this.cut()
     }
+  }
+
+  reset(value?: valuesType) {
+    this.getTargetTaskList(this.taskList, value).forEach(task => task.cancel())
+    return this.resetStatus().start()
   }
 
   setMaxSync(index: number) {
@@ -151,10 +138,10 @@ export class TaskList extends Task {
   }
 
   protected run(value?: valuesType) {
-    // 筛选出不存在于队列的任务或者空闲的任务
+    // 筛选出不存在于队列的任务并且空闲的任务
     const list = this.getTasks(value).filter((task) => {
       const index = this.getIndex(task)
-      return index === -1 || this.taskList[index].status !== 'active'
+      return index === -1 && this.taskList[index].status !== 'active'
     })
 
     // 放到预备队列
@@ -165,6 +152,7 @@ export class TaskList extends Task {
   protected cut() {
     this.executableTaskList.forEach((task) => {
       task.start()
+        .catch(err => this.triggerReject(err))
         .finally(() => this.next(!this.taskList.length))
     })
     return this
@@ -175,19 +163,6 @@ export class TaskList extends Task {
     if (index !== -1) {
       this.taskList.splice(index, 1)
     }
-    return this
-  }
-
-  private executePause(list: BaseTask[]) {
-    list.forEach(task => task.pause())
-    return this
-  }
-
-  private executeCancel(list: BaseTask[]) {
-    list.forEach((task) => {
-      this.pop(task)
-      task.cancel()
-    })
     return this
   }
 
@@ -204,17 +179,19 @@ export class TaskList extends Task {
     }
     return this
   }
+
+  private getTargetTaskList(originTask: BaseTask[], value?: valuesType) {
+    if (value === undefined) {
+      return originTask
+    }
+    else {
+      return this.getTasks(value).filter(task => originTask.includes(task))
+    }
+  }
 }
 
 type valueType = number | BaseTask
 type valuesType = valueType | valueType[]
-enum TaskMark {
-  ING, // 进行中
-  PREPARE, // 预备
-  WAIT, // 等待
-  PAUSE, // 等待
-  END, // 结束
-}
 
 function getStatusTask(list: BaseTask[], status: TaskStatus,
 ) {

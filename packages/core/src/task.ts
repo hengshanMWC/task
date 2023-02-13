@@ -13,6 +13,7 @@ export abstract class Task extends CurrentPromise implements BaseTask {
   }
 
   cancel() {
+    this.status = 'end'
     return this.clear()
   }
 
@@ -21,7 +22,6 @@ export abstract class Task extends CurrentPromise implements BaseTask {
   }
 
   clear() {
-    this.status = 'idle'
     this.currentPromise = undefined
     this.currentReject = undefined
     this.currentResolve = undefined
