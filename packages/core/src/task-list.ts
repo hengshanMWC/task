@@ -1,7 +1,7 @@
 import type { BaseTask, TaskStatus } from './core'
 import { Task } from './task'
 
-class TaskList extends Task {
+class TaskList extends Task<valuesType> {
   status: TaskStatus = 'idle'
   taskList: BaseTask[] = []
   protected maxSync = 1
