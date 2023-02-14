@@ -1,12 +1,12 @@
 type CurrentResolve = (data: any) => void
 type CurrentReject = (err: any) => void
 type TaskStatus = 'idle' | 'active' | 'pause' | 'end'
-interface BaseTask {
+interface BaseTask<T = any> {
   readonly status: TaskStatus
-  start: (...params: any) => Promise<any>
-  pause: (...params: any) => this
-  cancel: (...params: any) => this
-  reset: (...params: any) => Promise<any>
+  start: (params?: T) => Promise<any>
+  pause: (params?: T) => this
+  cancel: (params?: T) => this
+  reset: (params?: T) => Promise<any>
 }
 class CurrentPromise {
   protected currentPromise?: Promise<any>
