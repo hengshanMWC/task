@@ -1,7 +1,7 @@
 import type { BaseTask, TaskStatus } from './core'
 import { Task } from './task'
 
-export class TaskList extends Task {
+class TaskList extends Task {
   status: TaskStatus = 'idle'
   taskList: BaseTask[] = []
   protected maxSync = 1
@@ -196,4 +196,10 @@ type valuesType = valueType | valueType[]
 function getStatusTask(list: BaseTask[], status: TaskStatus,
 ) {
   return list.filter(item => item.status === status)
+}
+
+export {
+  TaskList,
+  valueType,
+  valuesType,
 }

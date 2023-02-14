@@ -1,5 +1,5 @@
 {
-  "name": "@abmao/task",
+  "name": "@abmao/task-file-read",
   "version": "0.0.1-alpha.3",
   "description": "task",
   "author": "mawencan",
@@ -20,5 +20,8 @@
     "build": "vite build && npm run type",
     "test": "vitest",
     "test:cov": "vitest --coverage"
+  },
+  "dependencies": {
+    "@abmao/task": "workspace:0.0.1-alpha.3"
   }
 }

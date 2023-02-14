@@ -1,6 +1,6 @@
 import type { BaseTask, TaskStatus } from './core'
 import { CurrentPromise } from './core'
-export abstract class Task extends CurrentPromise implements BaseTask {
+abstract class Task extends CurrentPromise implements BaseTask {
   status: TaskStatus = 'idle'
 
   start(...params: any): Promise<any> {
@@ -62,4 +62,8 @@ export abstract class Task extends CurrentPromise implements BaseTask {
 
   protected abstract run(...params: any): this
   protected abstract cut(): this
+}
+
+export {
+  Task,
 }
