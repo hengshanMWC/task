@@ -190,8 +190,8 @@ export class TaskList extends Task {
   }
 }
 
-type valueType = number | BaseTask
-type valuesType = valueType | valueType[]
+export type valueType = number | BaseTask
+export type valuesType = valueType | valueType[]
 
 function getStatusTask(list: BaseTask[], status: TaskStatus,
 ) {
