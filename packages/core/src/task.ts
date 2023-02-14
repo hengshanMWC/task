@@ -1,10 +1,11 @@
 import type { BaseTask, TaskStatus } from './core'
 import { CurrentPromise } from './core'
-abstract class Task extends CurrentPromise implements BaseTask {
+abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   status: TaskStatus = 'idle'
+  ctx: T
 
-  start(...params: any): Promise<any> {
-    return this.createPromiseSingleton(...params).currentPromise as Promise<any>
+  start(params?: T): Promise<any> {
+    return this.createPromiseSingleton(params).currentPromise as Promise<any>
   }
 
   pause() {
@@ -28,7 +29,7 @@ abstract class Task extends CurrentPromise implements BaseTask {
     return this
   }
 
-  private createPromiseSingleton(...params: any) {
+  private createPromiseSingleton(params?: T) {
     if (this.status === 'pause') {
       this.status = 'active'
       this.cut()
@@ -38,15 +39,17 @@ abstract class Task extends CurrentPromise implements BaseTask {
       this.currentPromise = new Promise((resolve, reject) => {
         this.currentResolve = resolve
         this.currentReject = reject
-        this.run(...params).cut()
+        this.run(params).cut()
+      }).finally(() => {
+        this.clear()
+        this.status = 'end'
       })
-      this.currentPromise.finally(() => this.status = 'end')
     }
     return this
   }
 
   protected next(end?: boolean) {
-    if (end) {
+    if (end === true) {
       this.triggerResolve()
     }
     else if (this.status === 'active') {
@@ -60,7 +63,12 @@ abstract class Task extends CurrentPromise implements BaseTask {
     return this
   }
 
-  protected abstract run(...params: any): this
+  protected run(params?: T) {
+    if (params !== undefined) {
+      this.ctx = params
+    }
+    return this
+  }
   protected abstract cut(): this
 }
 
