@@ -1,6 +1,6 @@
 {
   "name": "@abmao/task-file-read",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "task",
   "author": "mawencan",
   "license": "MIT",
@@ -22,6 +22,6 @@
     "test:cov": "vitest --coverage"
   },
   "dependencies": {
-    "@abmao/task": "workspace:0.0.1-alpha.2"
+    "@abmao/task": "workspace:0.0.1-alpha.3"
   }
 }
