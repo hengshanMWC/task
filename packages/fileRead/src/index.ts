@@ -1,4 +1,4 @@
-import { Task } from './task'
+import { Task } from '@abmao/task'
 const BYTES_PER_CHUNK = 1200
 
 class FileRead extends Task {

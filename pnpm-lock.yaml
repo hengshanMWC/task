@@ -45,6 +45,12 @@ importers:
   packages/core:
     specifiers: {}
 
+  packages/fileRead:
+    specifiers:
+      '@abmao/task': workspace:0.0.1-alpha.2
+    dependencies:
+      '@abmao/task': link:../core
+
 packages:
 
   /@algolia/autocomplete-core/1.7.2:
