@@ -31,7 +31,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
-  protected abstract cut(next: Next<Task>): this
+  protected abstract cut(next: Next<BaseTask>): this
 
   protected run(params?: T) {
     if (params !== undefined) {
@@ -40,7 +40,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
-  private execute(next: Next<Task>, param?: NextParam) {
+  private execute(next: Next<BaseTask>, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param
     if (end === true) {
       this.triggerResolve()
@@ -51,7 +51,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
-  private cutter(next: Next<Task>) {
+  private cutter(next: Next<BaseTask>) {
     try {
       this.cut(next)
     }
@@ -85,7 +85,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
 
   private createNext() {
     const sign = ++this.sign
-    const next: Next<Task> = (param) => {
+    const next: Next<BaseTask> = (param) => {
       if (sign === this.sign) {
         this.execute(next, param)
       }

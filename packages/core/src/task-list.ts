@@ -1,4 +1,5 @@
 import type { BaseTask, TaskStatus } from './core'
+import type { Next } from './task'
 import { Task } from './task'
 
 class TaskList extends Task<valuesType> {
@@ -62,7 +63,8 @@ class TaskList extends Task<valuesType> {
       return this
     }
     else {
-      return this.cut()
+      this.start()
+      return this
     }
   }
 
@@ -75,7 +77,8 @@ class TaskList extends Task<valuesType> {
       return this.clear()
     }
     else {
-      return this.cut()
+      this.start()
+      return this
     }
   }
 
@@ -149,11 +152,11 @@ class TaskList extends Task<valuesType> {
     return this
   }
 
-  protected cut() {
+  protected cut(next: Next<BaseTask>) {
     this.executableTaskList.forEach((task) => {
       task.start()
         .catch(err => this.triggerReject(err))
-        .finally(() => this.next(!this.taskList.length))
+        .finally(() => next(!this.taskList.length))
     })
     return this
   }
