@@ -1,3 +1,3 @@
 export * from './core'
-export * from './task'
-export * from './task-list'
+export * from './task/task'
+export * from './task/task-list'

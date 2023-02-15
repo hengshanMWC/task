@@ -1,22 +1,28 @@
-import type { BaseTask, TaskStatus } from './core'
-import { CurrentPromise } from './core'
+import type { BaseTask, TaskStatus } from '../core'
+import { CurrentPromise } from '../core'
 abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   status: TaskStatus = 'idle'
   ctx: T | undefined
   sign = 0
+  protected _next: Next
 
   start(params?: T): Promise<any> {
     return this.createPromiseSingleton(params).currentPromise as Promise<any>
   }
 
   pause() {
-    this.status = 'pause'
+    if (this.interceptPause()) {
+      this.status = 'pause'
+    }
     return this
   }
 
   cancel() {
-    this.status = 'end'
-    return this.clear()
+    if (this.interceptCancel()) {
+      this.status = 'end'
+      this.clear()
+    }
+    return this
   }
 
   reset(params?: T) {
@@ -31,7 +37,14 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
-  protected abstract cut(next: Next<BaseTask>): this
+  protected abstract cut(next: Next): this
+  protected interceptPause() {
+    return true
+  }
+
+  protected interceptCancel() {
+    return true
+  }
 
   protected run(params?: T) {
     if (params !== undefined) {
@@ -40,7 +53,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
-  private execute(next: Next<BaseTask>, param?: NextParam) {
+  private execute(next: Next, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param
     if (end === true) {
       this.triggerResolve()
@@ -51,7 +64,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
-  private cutter(next: Next<BaseTask>) {
+  private cutter(next: Next) {
     try {
       this.cut(next)
     }
@@ -85,7 +98,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
 
   private createNext() {
     const sign = ++this.sign
-    const next: Next<BaseTask> = (param) => {
+    const next: Next = (param) => {
       if (sign === this.sign) {
         this.execute(next, param)
       }
@@ -95,7 +108,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   }
 }
 type NextParam = boolean | (() => boolean)
-type Next<T> = (param?: NextParam) => T
+type Next<T = BaseTask> = (param?: NextParam) => T
 export {
   Task,
   NextParam,

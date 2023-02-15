@@ -1,4 +1,4 @@
-import { Task } from '@abmao/task'
+import { Task } from './task'
 const BYTES_PER_CHUNK = 1200
 
 class FileRead extends Task {
@@ -32,22 +32,31 @@ class FileRead extends Task {
     return this.readProgress >= 1
   }
 
-  protected run() {
-    return this
-  }
-
-  protected cut() {
+  protected cut(next) {
     const start = BYTES_PER_CHUNK * this.fileChunk++
     const end = Math.min(this.file.size, start + BYTES_PER_CHUNK)
     this.fileReader[this.type](this.file.slice(start, end))
+    if (!this.fileReader.onload) {
+      const handleLoad = () => {
+        this.handleFileReaderLoad()
+        next(this.readEnd)
+      }
+      this.fileReader.onload = handleLoad
+    }
     return this
+  }
+
+  protected interceptCancel() {
+    if (this.fileReader.onload) {
+      this.fileReader.onload = null
+    }
+    return true
   }
 
   private handleFileReaderLoad() {
     if (this.cd && this.fileReader.result instanceof Blob) {
       this.cd(this.fileReader.result, this.readProgress)
     }
-    this.next(this.readEnd)
   }
 
   private handleFileReaderError() {

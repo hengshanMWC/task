@@ -1,4 +1,4 @@
-import type { BaseTask, TaskStatus } from './core'
+import type { BaseTask, TaskStatus } from '../core'
 import type { Next } from './task'
 import { Task } from './task'
 
@@ -152,7 +152,7 @@ class TaskList extends Task<valuesType> {
     return this
   }
 
-  protected cut(next: Next<BaseTask>) {
+  protected cut(next: Next) {
     this.executableTaskList.forEach((task) => {
       task.start()
         .catch(err => this.triggerReject(err))
