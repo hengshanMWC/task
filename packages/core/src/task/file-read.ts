@@ -5,7 +5,7 @@ class FileRead extends Task<FileReadParams> {
   private fileReaderType: FileReaderType
   private fileChunk = 0 // 文件的读取完成度
   private fileReader: FileReader
-  private cd?: (chunk: Blob, progress: number, file: File) => void
+  private cd?: (chunk: Blob, progress: number, file: Blob) => void
   constructor(cd?: FileRead['cd'], type: FileRead['type'] = FileReaderType.ARRAY_BUFFER) {
     super()
     this.fileReaderType = type
@@ -81,7 +81,7 @@ class FileRead extends Task<FileReadParams> {
 }
 
 interface FileReadParams {
-  file: File
+  file: Blob
   cd?: FileRead['cd']
   type?: FileRead['fileReaderType']
 }
