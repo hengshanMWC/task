@@ -31,6 +31,8 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
     return this
   }
 
+  protected abstract cut(next: Next<Task>): this
+
   protected run(params?: T) {
     if (params !== undefined) {
       this.ctx = params
@@ -44,23 +46,26 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
       this.triggerResolve()
     }
     else if (this.status === 'active') {
-      try {
-        this.cut(next)
-      }
-      catch (err) {
-        this.triggerReject(err)
-      }
+      this.cutter(next)
     }
     return this
   }
 
-  protected abstract cut(next: Next<Task>): this
+  private cutter(next: Next<Task>) {
+    try {
+      this.cut(next)
+    }
+    catch (err) {
+      this.triggerReject(err)
+    }
+    return this
+  }
 
   private createPromiseSingleton(params?: T) {
     if (this.status === 'pause') {
       this.status = 'active'
       const next = this.createNext()
-      this.cut(next)
+      this.cutter(next)
     }
     else if (this.status !== 'active') {
       this.status = 'active'
@@ -69,7 +74,7 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
         this.currentResolve = resolve
         this.currentReject = reject
 
-        this.run(params).cut(next)
+        this.run(params).cutter(next)
       }).finally(() => {
         this.clear()
         this.status = 'end'
