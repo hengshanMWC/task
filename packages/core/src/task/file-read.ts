@@ -1,16 +1,14 @@
 import { Task } from './task'
 const BYTES_PER_CHUNK = 1200
 
-class FileRead extends Task {
-  file: File
-  private type: FileReaderType
+class FileRead extends Task<FileReadParams> {
+  private fileReaderType: FileReaderType
   private fileChunk = 0 // 文件的读取完成度
   private fileReader: FileReader
-  private cd?: (chunk: Blob, progress: number) => void
-  constructor(file: File, cd?: FileRead['cd'], type: FileRead['type'] = FileReaderType.ARRAY_BUFFER) {
+  private cd?: (chunk: Blob, progress: number, file: File) => void
+  constructor(cd?: FileRead['cd'], type: FileRead['type'] = FileReaderType.ARRAY_BUFFER) {
     super()
-    this.file = file
-    this.type = type
+    this.fileReaderType = type
     if (cd) {
       this.cd = cd
     }
@@ -18,31 +16,48 @@ class FileRead extends Task {
     this.fileReader.addEventListener('error', () => {
       this.handleFileReaderError()
     })
-    this.fileReader.addEventListener('load', () => {
-      this.handleFileReaderLoad()
-    })
   }
 
   get readProgress() {
-    const currentProgress = BYTES_PER_CHUNK * this.fileChunk
-    return currentProgress / this.file.size
+    if (this.ctx) {
+      const currentProgress = BYTES_PER_CHUNK * this.fileChunk
+      return currentProgress / this.ctx.file.size
+    }
+    else {
+      return 0
+    }
   }
 
   get readEnd() {
     return this.readProgress >= 1
   }
 
+  get type() {
+    return (this.ctx?.type ? this.ctx.type : this.fileReaderType)
+  }
+
+  get handleProgress() {
+    return (this.ctx?.cd ? this.ctx.cd : this.cd)
+  }
+
   protected cut(next) {
-    const start = BYTES_PER_CHUNK * this.fileChunk++
-    const end = Math.min(this.file.size, start + BYTES_PER_CHUNK)
-    this.fileReader[this.type](this.file.slice(start, end))
-    if (!this.fileReader.onload) {
-      const handleLoad = () => {
-        this.handleFileReaderLoad()
-        next(this.readEnd)
+    const file = this.ctx?.file
+    if (file) {
+      const start = BYTES_PER_CHUNK * this.fileChunk++
+      const end = Math.min(file.size, start + BYTES_PER_CHUNK)
+      this.fileReader[this.type](file.slice(start, end))
+      if (!this.fileReader.onload) {
+        const handleLoad = () => {
+          this.handleFileReaderLoad()
+          next(this.readEnd)
+        }
+        this.fileReader.onload = handleLoad
       }
-      this.fileReader.onload = handleLoad
     }
+    else {
+      this.handleFileReaderError()
+    }
+
     return this
   }
 
@@ -53,14 +68,22 @@ class FileRead extends Task {
   }
 
   private handleFileReaderLoad() {
-    if (this.cd && this.fileReader.result instanceof Blob) {
-      this.cd(this.fileReader.result, this.readProgress)
+    if (this.handleProgress && this.ctx?.file && this.fileReader.result instanceof Blob) {
+      this.handleProgress(this.fileReader.result, this.readProgress, this.ctx?.file)
     }
   }
 
   private handleFileReaderError() {
-    this.triggerReject(new Error(`Error occurred reading file: ${this.file.name}`))
+    const name = this.ctx ? this.ctx.file.name : 'not file'
+    this.triggerReject(new Error(`Error occurred reading file: ${name}`))
+    this.interceptCancel()
   }
+}
+
+interface FileReadParams {
+  file: File
+  cd?: FileRead['cd']
+  type?: FileRead['fileReaderType']
 }
 
 enum FileReaderType {
