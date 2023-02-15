@@ -3,14 +3,18 @@ const BYTES_PER_CHUNK = 1200
 
 class FileRead extends Task<FileReadParams> {
   private fileReaderType: FileReaderType
+  private bytesPerChunk = BYTES_PER_CHUNK
   private fileChunk = 0 // 文件的读取完成度
   private fileReader: FileReader
   private cd?: (chunk: Blob, progress: number, file: Blob) => void
-  constructor(cd?: FileRead['cd'], type: FileRead['type'] = FileReaderType.ARRAY_BUFFER) {
+  constructor(cd?: FileRead['cd'], type: FileRead['type'] = FileReaderType.ARRAY_BUFFER, bytesPerChunk?: number) {
     super()
     this.fileReaderType = type
     if (cd) {
       this.cd = cd
+    }
+    if (bytesPerChunk) {
+      this.bytesPerChunk = bytesPerChunk
     }
     this.fileReader = new FileReader()
     this.fileReader.addEventListener('error', () => {
@@ -20,8 +24,8 @@ class FileRead extends Task<FileReadParams> {
 
   get readProgress() {
     if (this.ctx) {
-      const currentProgress = BYTES_PER_CHUNK * this.fileChunk
-      return currentProgress / this.ctx.file.size
+      const currentProgress = this.bytesPerChunk * this.fileChunk
+      return Math.min(currentProgress / this.ctx.file.size, 1)
     }
     else {
       return 0
@@ -43,8 +47,8 @@ class FileRead extends Task<FileReadParams> {
   protected cut(next) {
     const file = this.ctx?.file
     if (file) {
-      const start = BYTES_PER_CHUNK * this.fileChunk++
-      const end = Math.min(file.size, start + BYTES_PER_CHUNK)
+      const start = this.bytesPerChunk * this.fileChunk++
+      const end = Math.min(file.size, start + this.bytesPerChunk)
       this.fileReader[this.type](file.slice(start, end))
       if (!this.fileReader.onload) {
         const handleLoad = () => {

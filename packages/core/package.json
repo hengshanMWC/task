@@ -20,5 +20,8 @@
     "build": "vite build && npm run type",
     "test": "vitest",
     "test:cov": "vitest --coverage"
+  },
+  "devDependencies": {
+    "happy-dom": "^8.4.0"
   }
 }

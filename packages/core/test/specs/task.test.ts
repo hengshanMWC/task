@@ -1,29 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import { Task } from '../../src/index'
 import { wait } from '../utils'
-const value = 2
 
-class TestTask extends Task<number> {
-  cut(next) {
-    if (this.ctx === value + 1) {
-      throw new Error('test')
-    }
-    else {
-      Promise.resolve()
-        .then(() => {
-          next(() => {
-            if (this.ctx) {
-              this.ctx--
-            }
-            else {
-              return true
-            }
-          })
-        })
-    }
-    return this
-  }
-}
 describe('test', () => {
   test('start->pause->start', async () => {
     const task = new TestTask()
@@ -71,3 +49,26 @@ describe('test', () => {
     expect(fn).toHaveBeenCalled()
   })
 })
+const value = 2
+
+class TestTask extends Task<number> {
+  cut(next) {
+    if (this.ctx === value + 1) {
+      throw new Error('test')
+    }
+    else {
+      Promise.resolve()
+        .then(() => {
+          next(() => {
+            if (this.ctx) {
+              this.ctx--
+            }
+            else {
+              return true
+            }
+          })
+        })
+    }
+    return this
+  }
+}
