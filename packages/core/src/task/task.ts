@@ -4,7 +4,6 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   status: TaskStatus = 'idle'
   ctx: T | undefined
   sign = 0
-  protected _next: Next
 
   start(params?: T): Promise<any> {
     return this.createPromiseSingleton(params).currentPromise as Promise<any>

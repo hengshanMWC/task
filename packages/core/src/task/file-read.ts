@@ -52,9 +52,11 @@ class FileRead extends Task<FileReadParams> {
       this.fileReader[this.type](file.slice(start, end))
       if (!this.fileReader.onload) {
         const handleLoad = () => {
-          this.fileChunk++
-          this.handleFileReaderLoad()
-          next(this.readEnd)
+          next(() => {
+            this.fileChunk++
+            this.handleFileReaderLoad()
+            return this.readEnd
+          })
         }
         this.fileReader.onload = handleLoad
       }

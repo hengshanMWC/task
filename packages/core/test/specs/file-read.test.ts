@@ -26,19 +26,29 @@ describe('test', () => {
     const cd = vi.fn()
     const file = createFileRead()
     const fileRead = new FileRead(fn, FileReaderType.BINARY_STRING)
-    try {
-      await fileRead.start({
-        file,
-        cd,
-        type: FileReaderType.TEXT,
-      })
-      expect(fn).not.toHaveBeenCalled()
-      expect(cd).toHaveReturnedTimes(1)
-    }
-    catch (err) {
-      console.log(err)
-    }
+    await fileRead.start({
+      file,
+      cd,
+      type: FileReaderType.TEXT,
+    })
+    expect(fn).not.toHaveBeenCalled()
+    expect(cd).toHaveReturnedTimes(1)
   })
+  // test('pause', async () => {
+  //   const cd = vi.fn()
+  //   const file = createFileRead()
+  //   const fileRead = new FileRead()
+  //   fileRead.start({
+  //     file,
+  //     cd,
+  //   })
+  //   fileRead.pause()
+  //   await wait()
+  //   expect(cd).not.toHaveBeenCalled()
+  //   await fileRead.start()
+  //     .then(cd)
+  //   expect(cd).toHaveBeenCalledTimes(1)
+  // })
 })
 
 function createFileRead(frequency = 10) {
