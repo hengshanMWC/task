@@ -11,14 +11,14 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   }
 
   pause() {
-    if (this.interceptPause()) {
+    if (this.interceptPause() !== false) {
       this.status = 'pause'
     }
     return this
   }
 
   cancel() {
-    if (this.interceptCancel()) {
+    if (this.interceptCancel() !== false) {
       this.status = 'end'
       this.clear()
     }
@@ -38,12 +38,10 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   }
 
   protected abstract cut(next: Next): this
-  protected interceptPause() {
-    return true
+  protected interceptPause(): any {
   }
 
-  protected interceptCancel() {
-    return true
+  protected interceptCancel(): any {
   }
 
   protected run(params?: T) {

@@ -50,7 +50,6 @@ class FileRead extends Task {
     if (this.fileReader.onload) {
       this.fileReader.onload = null
     }
-    return true
   }
 
   private handleFileReaderLoad() {
