@@ -98,4 +98,6 @@ type NextParam = boolean | (() => boolean)
 type Next<T> = (param?: NextParam) => T
 export {
   Task,
+  NextParam,
+  Next,
 }
