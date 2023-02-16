@@ -3,6 +3,7 @@ import { Task } from './task'
 
 class CountDown extends Task<CountDownParams, CountDownCtx> {
   timer: NodeJS.Timeout
+  callback?: (ctx: CountDownCtx) => void
   constructor() {
     super()
   }
@@ -55,6 +56,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
       if (ctx.endCountDownTime) {
         ctx.currentTime = Date.now()
       }
+      this.callback && this.callback(ctx)
       return ctx.status === CountDownStatus.END
     })
   }
@@ -72,6 +74,7 @@ interface CountDownParams {
   time?: number
   startTime?: number
   endTime?: number
+  callback?: CountDown['callback']
 }
 
 interface CountDownCtx {
