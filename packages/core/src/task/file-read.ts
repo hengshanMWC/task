@@ -68,10 +68,22 @@ class FileRead extends Task<FileReadParams> {
     return this
   }
 
-  protected interceptCancel() {
+  private abort() {
     if (this.fileReader.onload) {
       this.fileReader.onload = null
     }
+    try {
+      this.fileReader.abort()
+    }
+    catch {}
+  }
+
+  protected interceptCancel() {
+    this.abort()
+  }
+
+  protected interceptPause() {
+    this.abort()
   }
 
   private handleFileReaderLoad() {

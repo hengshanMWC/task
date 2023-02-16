@@ -34,21 +34,23 @@ describe('test', () => {
     expect(fn).not.toHaveBeenCalled()
     expect(cd).toHaveReturnedTimes(1)
   })
-  // test('pause', async () => {
-  //   const cd = vi.fn()
-  //   const file = createFileRead()
-  //   const fileRead = new FileRead()
-  //   fileRead.start({
-  //     file,
-  //     cd,
-  //   })
-  //   fileRead.pause()
-  //   await wait()
-  //   expect(cd).not.toHaveBeenCalled()
-  //   await fileRead.start()
-  //     .then(cd)
-  //   expect(cd).toHaveBeenCalledTimes(1)
-  // })
+  test('pause', async () => {
+    const cd = vi.fn((...param) => {
+      param
+    })
+    const file = createFileRead()
+    const fileRead = new FileRead()
+    fileRead.start({
+      file,
+      cd,
+    })
+    fileRead.pause()
+    await wait()
+    expect(cd).not.toHaveBeenCalled()
+    await fileRead.start()
+    // .then(cd)
+    expect(cd).toHaveBeenCalledTimes(0)
+  })
 })
 
 function createFileRead(frequency = 10) {
