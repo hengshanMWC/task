@@ -92,7 +92,6 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
 
         this.run(params).cutter(next)
       }).finally(() => {
-        this.clear()
         this.status = 'end'
       })
     }
