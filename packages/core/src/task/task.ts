@@ -45,7 +45,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
 
   protected run(params?: T) {
     const ctx = this.createCtx(params)
-    if (ctx !== undefined) {
+    if (this.status === 'end' || ctx !== undefined) {
       this.ctx = ctx
     }
     return this
@@ -88,10 +88,8 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
       this.currentPromise = new Promise((resolve, reject) => {
         this.currentResolve = resolve
         this.currentReject = reject
-
         this.run(params).cutter(next)
       }).finally(() => {
-        this.clear()
         this.status = 'end'
       })
     }
