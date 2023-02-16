@@ -4,12 +4,19 @@ import { Task } from './task'
 class CountDown extends Task<CountDownParams, CountDownCtx> {
   timer: NodeJS.Timeout
   callback?: (ctx: CountDownCtx) => void
-  constructor() {
+  timerGroup: TimerGroup
+  constructor(timerGroupValue: CountDownTimerGroup | TimerGroup = CountDownTimerGroup.TIMEOUT) {
     super()
+    if (Number(timerGroupValue)) {
+      this.timerGroup = timerGroup[timerGroupValue as CountDownTimerGroup]
+    }
+    else {
+      this.timerGroup = timerGroupValue as TimerGroup
+    }
   }
 
   protected cut(next) {
-    this.timer = this.forward(() => {
+    this.timer = this.timing(() => {
       if (this.ctx) {
         this.dealWith(next, this.ctx)
       }
@@ -62,12 +69,12 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
   }
 
   private stop() {
-    clearTimeout(this.timer)
+    this.timerGroup.stop(this.timer)
     return this
   }
 
-  private forward(fn: Parameters<typeof setTimeout>[0]) {
-    return setTimeout(fn)
+  private timing(fn: Function) {
+    return this.timerGroup.timing(fn)
   }
 }
 interface CountDownParams {
@@ -93,9 +100,25 @@ enum CountDownStatus {
   END,
 }
 
+enum CountDownTimerGroup {
+  TIMEOUT,
+}
+interface TimerGroup {
+  stop: Function
+  timing: Function
+}
+
+const timerGroup: Record<CountDownTimerGroup, TimerGroup> = {
+  [CountDownTimerGroup.TIMEOUT]: {
+    stop: clearTimeout,
+    timing: setTimeout,
+  },
+}
 export {
   CountDown,
   CountDownParams,
   CountDownCtx,
   CountDownStatus,
+  CountDownTimerGroup,
+  TimerGroup,
 }
