@@ -1,8 +1,8 @@
 import type { BaseTask, TaskStatus } from '../core'
 import { CurrentPromise } from '../core'
-abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
+abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask<T> {
   status: TaskStatus = 'idle'
-  ctx: T | undefined
+  ctx: Ctx | undefined
   sign = 0
 
   start(params?: T): Promise<any> {
@@ -44,10 +44,15 @@ abstract class Task<T = any> extends CurrentPromise implements BaseTask<T> {
   }
 
   protected run(params?: T) {
-    if (params !== undefined) {
-      this.ctx = params
+    const ctx = this.createCtx(params)
+    if (ctx !== undefined) {
+      this.ctx = ctx
     }
     return this
+  }
+
+  protected createCtx(params?: T): Ctx {
+    return params as Ctx
   }
 
   private execute(next: Next, param?: NextParam) {
