@@ -7,11 +7,11 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
   timerGroup: TimerGroup
   constructor(timerGroupValue: CountDownTimerGroup | TimerGroup = CountDownTimerGroup.TIMEOUT) {
     super()
-    if (Number(timerGroupValue)) {
-      this.timerGroup = timerGroup[timerGroupValue as CountDownTimerGroup]
+    if (typeof timerGroupValue === 'number') {
+      this.timerGroup = timerGroup[timerGroupValue]
     }
     else {
-      this.timerGroup = timerGroupValue as TimerGroup
+      this.timerGroup = timerGroupValue
     }
   }
 
