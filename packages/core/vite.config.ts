@@ -22,7 +22,7 @@ export default defineConfig({
     },
   },
   test: {
-    threads: false, // process.chdir() is not supported in workers
+    threads: true, // process.chdir() is not supported in workers
     globals: true,
     watch: false,
   },
