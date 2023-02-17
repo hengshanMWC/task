@@ -51,8 +51,8 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return this
   }
 
-  protected createCtx(params?: T): Ctx {
-    return params as Ctx
+  protected createCtx(params?: T): CreateCtx<Ctx> {
+    return params as CreateCtx<Ctx>
   }
 
   private execute(next: Next, param?: NextParam) {
@@ -109,6 +109,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
 }
 type NextParam = boolean | (() => boolean)
 type Next<T = BaseTask> = (param?: NextParam) => T
+type CreateCtx<Ctx = any> = Ctx | undefined
 export {
   Task,
   NextParam,
