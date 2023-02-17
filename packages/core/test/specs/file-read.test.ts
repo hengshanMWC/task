@@ -14,12 +14,13 @@ describe('test', () => {
     })
     const file = createFileRead()
     const fileRead = new FileRead(fn, FileReaderType.DATA_URL, 100)
-
+    expect(fileRead.readProgress).toBe(0)
     await fileRead.start({
       file,
     })
     expect(progressFn).toHaveLastReturnedWith(1)
     expect(fn).toHaveReturnedTimes(2)
+    expect(fileRead.readProgress).toBe(1)
   })
   test('start params', async () => {
     const fn = vi.fn()
@@ -39,18 +40,65 @@ describe('test', () => {
     const handleSuccess = vi.fn()
     const file = createFileRead()
     const fileRead = new FileRead()
-    fileRead.start({
+    const task = fileRead.start({
       file,
       cd,
     })
-      .then(handleSuccess)
+    task.then(handleSuccess)
     fileRead.pause()
     await wait()
     expect(cd).not.toHaveBeenCalled()
-    await fileRead.start()
-      .then(handleSuccess)
+    const task2 = fileRead.start()
+    await task2.then(handleSuccess)
     expect(cd).toHaveBeenCalledTimes(1)
     expect(handleSuccess).toHaveBeenCalledTimes(2)
+    expect(task2).toBe(task)
+  })
+  test('cancel', async () => {
+    const cd = vi.fn()
+    const handleSuccess = vi.fn()
+    const file = createFileRead()
+    const fileRead = new FileRead()
+    const task = fileRead.start({
+      file,
+      cd,
+    })
+    task.then(handleSuccess)
+    fileRead.cancel()
+    await wait()
+    expect(cd).not.toHaveBeenCalled()
+    const task2 = fileRead.start({
+      file,
+    })
+    await task2.then(handleSuccess)
+    expect(cd).not.toHaveBeenCalled()
+    expect(handleSuccess).toHaveBeenCalledTimes(1)
+    expect(task2).not.toBe(task)
+  })
+  test('reset', async () => {
+    const cd = vi.fn()
+    const handleSuccess = vi.fn()
+    const file = createFileRead()
+    const fileRead = new FileRead()
+    const task = fileRead.start({
+      file,
+      cd,
+    })
+    task.then(handleSuccess)
+    const task2 = fileRead.reset({
+      file,
+    })
+    await task2.then(handleSuccess)
+    expect(cd).not.toHaveBeenCalled()
+    expect(handleSuccess).toHaveBeenCalledTimes(1)
+    expect(task2).not.toBe(task)
+  })
+  test('not file', () => {
+    const cd = vi.fn()
+    const fileRead = new FileRead()
+    fileRead.start()
+      .catch(cd)
+      .finally(() => expect(cd).toHaveBeenCalled())
   })
 })
 
