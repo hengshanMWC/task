@@ -42,7 +42,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
         return Math.max(this.endTime - this.currentTime, 0)
       },
       get startCountDownTime() {
-        return Math.max(this.startCountDownTime - this.currentTime, 0)
+        return Math.max(this.startTime - this.currentTime, 0)
       },
       get status() {
         if (!this.endCountDownTime) {
