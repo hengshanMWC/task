@@ -29,7 +29,6 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   clear() {
-    this.ctx = undefined
     this.currentPromise = undefined
     this.currentReject = undefined
     this.currentResolve = undefined
