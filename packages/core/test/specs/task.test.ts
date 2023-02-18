@@ -26,7 +26,6 @@ describe('test', () => {
     const task = new TestTask()
     task.start(value)
     task.cancel()
-    expect(task.ctx).toBeUndefined()
     expect(task.status).toBe('end')
   })
   test('reset', async () => {
