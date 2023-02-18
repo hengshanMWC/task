@@ -44,15 +44,17 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
 
   protected run(params?: T) {
     const ctx = this.createCtx(params)
-    if (this.status === 'end' || ctx !== undefined) {
-      this.ctx = ctx
-    }
+    // if (this.status === 'end' || ctx !== undefined) {
+    this.ctx = ctx
+    // }
     return this
   }
 
   protected createCtx(params?: T): CreateCtx<Ctx> {
     return params as CreateCtx<Ctx>
   }
+
+  protected proceed(params?: T) {}
 
   private execute(next: Next, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param
@@ -78,6 +80,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   private createPromiseSingleton(params?: T) {
     if (this.status === 'pause') {
       this.status = 'active'
+      this.proceed(params)
       const next = this.createNext()
       this.cutter(next)
     }
