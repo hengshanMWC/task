@@ -43,9 +43,9 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   protected run(params?: T) {
-    const ctx = this.createCtx(params)
+    this.ctx = this.createCtx(params)
     // if (this.status === 'end' || ctx !== undefined) {
-    this.ctx = ctx
+    // this.ctx = ctx
     // }
     return this
   }
