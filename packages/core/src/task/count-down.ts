@@ -28,33 +28,35 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
     this.stop()
   }
 
-  protected createCtx(params?: CountDownParams): CountDownCtx {
-    const now = Date.now()
-    const time = params?.time || 60
-    const startTime = params?.startTime || now
-    const endTime = params?.endTime || startTime + time * 1000
-    return {
-      time,
-      startTime,
-      currentTime: now,
-      endTime,
-      get endCountDownTime() {
-        return Math.max(this.endTime - this.currentTime, 0)
-      },
-      get startCountDownTime() {
-        return Math.max(this.startTime - this.currentTime, 0)
-      },
-      get status() {
-        if (!this.endCountDownTime) {
-          return CountDownStatus.END
-        }
-        else if (!this.startCountDownTime) {
-          return CountDownStatus.ACTIVITY
-        }
-        else {
-          return CountDownStatus.WAIT
-        }
-      },
+  protected createCtx(params?: CountDownParams) {
+    if (!this.ctx) {
+      const currentTime = Date.now()
+      const time = params?.time || 60
+      const startTime = params?.startTime || currentTime
+      const endTime = params?.endTime || startTime + time * 1000
+      return {
+        time,
+        startTime,
+        currentTime,
+        endTime,
+        get endCountDownTime() {
+          return Math.max(this.endTime - this.currentTime, 0)
+        },
+        get startCountDownTime() {
+          return Math.max(this.startTime - this.currentTime, 0)
+        },
+        get status() {
+          if (!this.endCountDownTime) {
+            return CountDownStatus.END
+          }
+          else if (!this.startCountDownTime) {
+            return CountDownStatus.ACTIVITY
+          }
+          else {
+            return CountDownStatus.WAIT
+          }
+        },
+      }
     }
   }
 
