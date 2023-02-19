@@ -87,12 +87,12 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
   }
 
   stop() {
-    this.timerGroup.stop(this.timer)
+    this.timerGroup.stop()(this.timer)
     return this
   }
 
   timing(fn: Function) {
-    return this.timerGroup.timing(fn)
+    return this.timerGroup.timing()(fn)
   }
 }
 
@@ -125,14 +125,14 @@ enum CountDownTimerGroup {
   TIMEOUT,
 }
 interface TimerGroup {
-  stop: Function
-  timing: Function
+  stop: () => Function
+  timing: () => Function
 }
 
 const timerGroup: Record<CountDownTimerGroup, TimerGroup> = {
   [CountDownTimerGroup.TIMEOUT]: {
-    stop: clearTimeout,
-    timing: setTimeout,
+    stop: () => clearTimeout,
+    timing: () => setTimeout,
   },
 }
 export {
