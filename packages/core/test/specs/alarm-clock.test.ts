@@ -23,7 +23,7 @@ describe('test', () => {
     const callback = vi.fn((ctx: AlarmClockCtx) => {
       expect(ctx.endTime).not.toBe(endTime)
     })
-    const startTime = Date.now() + 100 // 为了测试wait状态
+    const startTime = Date.now() + 500 // 为了测试wait状态
     const endTime = startTime + 1
     const handlesSuccess = vi.fn(() => {
       if (task.ctx) {
