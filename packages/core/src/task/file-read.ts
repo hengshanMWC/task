@@ -96,8 +96,7 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
   }
 
   private handleFileReaderError() {
-    const name = this.ctx ? this.ctx.file.name : 'not file'
-    this.triggerReject(new Error(`Error occurred reading file: ${name}`))
+    this.triggerReject(new Error('Error occurred reading file: not file'))
     this.interceptCancel()
   }
 }
