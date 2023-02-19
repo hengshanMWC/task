@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 import type { AlarmClockCtx } from '../../src/index'
 import { AlarmClock, AlarmClockStatus } from '../../src/index'
 import { wait } from '../utils'
+const time = 0.001
 /**
  * @vitest-environment jsdom
  */
@@ -9,7 +10,7 @@ describe('test', () => {
   test('start', async () => {
     const task = new AlarmClock()
     await task.start({
-      time: 1,
+      time,
     })
     if (task.ctx) {
       expect(task.ctx.status).toBe(AlarmClockStatus.END)
@@ -22,13 +23,14 @@ describe('test', () => {
     const callback = vi.fn((ctx: AlarmClockCtx) => {
       expect(ctx.endTime).not.toBe(endTime)
     })
+    const startTime = Date.now() + 1
+    const endTime = startTime + 1
     const handlesSuccess = vi.fn(() => {
       if (task.ctx) {
         expect(task.ctx.status).toBe(AlarmClockStatus.END)
+        expect(task.ctx.endTime).toBeGreaterThan(endTime)
       }
     })
-    const startTime = Date.now() + 1000
-    const endTime = startTime + 1000
     task.start({
       startTime,
       endTime,
@@ -46,7 +48,7 @@ describe('test', () => {
     const task = new AlarmClock()
     const handlesSuccess = vi.fn()
     const callback = vi.fn()
-    const p1 = task.start({ time: 1, callback })
+    const p1 = task.start({ time, callback })
       .then(handlesSuccess)
     task.cancel()
     await wait()
