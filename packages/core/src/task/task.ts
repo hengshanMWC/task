@@ -19,6 +19,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   cancel() {
     if (this.interceptCancel() !== false) {
       this.status = 'end'
+      this.ctx = undefined
       this.clear()
     }
     return this
@@ -43,10 +44,10 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   protected run(params?: T) {
-    this.ctx = this.createCtx(params)
-    // if (this.status === 'end' || ctx !== undefined) {
-    // this.ctx = ctx
-    // }
+    const ctx = this.createCtx(params)
+    if (this.status === 'end' || ctx !== undefined) {
+      this.ctx = ctx
+    }
     return this
   }
 
