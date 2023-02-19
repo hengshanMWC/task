@@ -2,7 +2,7 @@ import type { BaseTask, TaskStatus } from '../core'
 import type { Next } from './task'
 import { Task } from './task'
 
-class TaskList extends Task<valuesType> {
+class TaskList extends Task<TaskListParams> {
   status: TaskStatus = 'idle'
   taskList: BaseTask[] = []
   protected maxSync = 1
@@ -57,7 +57,7 @@ class TaskList extends Task<valuesType> {
     return Math.max(this.maxSync - this.activeTaskList.length, 0)
   }
 
-  pause(value?: valuesType) {
+  pause(value?: TaskListParams) {
     this.getTargetTaskList(this.prepareTaskList, value).forEach(task => task.pause())
     if (this.resetStatus().status === 'pause') {
       return this
@@ -68,7 +68,7 @@ class TaskList extends Task<valuesType> {
     }
   }
 
-  cancel(value?: valuesType) {
+  cancel(value?: TaskListParams) {
     this.getTargetTaskList(this.taskList, value).forEach((task) => {
       this.pop(task)
       task.cancel()
@@ -82,7 +82,7 @@ class TaskList extends Task<valuesType> {
     }
   }
 
-  reset(value?: valuesType) {
+  reset(value?: TaskListParams) {
     this.getTargetTaskList(this.taskList, value).forEach(task => task.cancel())
     return this.resetStatus().start()
   }
@@ -120,7 +120,7 @@ class TaskList extends Task<valuesType> {
     return typeof value === 'number' ? this.taskList[value] : value
   }
 
-  getTasks(value?: valuesType): BaseTask[] {
+  getTasks(value?: TaskListParams): BaseTask[] {
     if (value === undefined) {
       return this.taskList
     }
@@ -132,7 +132,7 @@ class TaskList extends Task<valuesType> {
     return typeof value === 'number' ? value : this.taskList.findIndex(task => task === value)
   }
 
-  getIndexs(value?: valuesType): number[] {
+  getIndexs(value?: TaskListParams): number[] {
     if (value === undefined) {
       return this.taskList.map((task, index) => index)
     }
@@ -140,7 +140,7 @@ class TaskList extends Task<valuesType> {
     return arr.map(value => this.getIndex(value))
   }
 
-  protected run(value?: valuesType) {
+  protected run(value?: TaskListParams) {
     // 筛选出不存在于队列的任务并且空闲的任务
     const list = this.getTasks(value).filter((task) => {
       const index = this.getIndex(task)
@@ -183,7 +183,7 @@ class TaskList extends Task<valuesType> {
     return this
   }
 
-  private getTargetTaskList(originTask: BaseTask[], value?: valuesType) {
+  private getTargetTaskList(originTask: BaseTask[], value?: TaskListParams) {
     if (value === undefined) {
       return originTask
     }
@@ -194,7 +194,7 @@ class TaskList extends Task<valuesType> {
 }
 
 type valueType = number | BaseTask
-type valuesType = valueType | valueType[]
+type TaskListParams = valueType | valueType[]
 
 function getStatusTask(list: BaseTask[], status: TaskStatus,
 ) {
@@ -204,5 +204,5 @@ function getStatusTask(list: BaseTask[], status: TaskStatus,
 export {
   TaskList,
   valueType,
-  valuesType,
+  TaskListParams,
 }
