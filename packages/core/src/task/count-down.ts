@@ -3,7 +3,6 @@ import { Task } from './task'
 
 class CountDown extends Task<CountDownParams, CountDownCtx> {
   timer: NodeJS.Timeout
-  callback?: (ctx: CountDownCtx) => void
   timerGroup: TimerGroup
   constructor(timerGroupValue: CountDownTimerGroup | TimerGroup = CountDownTimerGroup.TIMEOUT) {
     super()
@@ -34,7 +33,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
 
   protected createCtx(params?: CountDownParams) {
     if (!this.ctx) {
-      return this.createContext()
+      return this.createContext(params)
     }
   }
 
@@ -73,6 +72,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
           return CountDownStatus.WAIT
         }
       },
+      callback: params?.callback,
     }
   }
 
@@ -81,7 +81,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
       if (ctx.endCountDownTime) {
         ctx.currentTime = Date.now()
       }
-      this.callback && this.callback(ctx)
+      ctx.callback && ctx.callback(ctx)
       return ctx.status === CountDownStatus.END
     })
   }
@@ -95,11 +95,13 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
     return this.timerGroup.timing(fn)
   }
 }
+
+type CountDownCallback = (ctx: CountDownCtx) => void
 interface CountDownParams {
   time?: number
   startTime?: number
   endTime?: number
-  callback?: CountDown['callback']
+  callback?: CountDownCallback
 }
 
 interface CountDownCtx {
@@ -110,6 +112,7 @@ interface CountDownCtx {
   readonly endCountDownTime: number
   readonly startCountDownTime: number
   readonly status: CountDownStatus
+  callback?: CountDownCallback
 }
 
 enum CountDownStatus {

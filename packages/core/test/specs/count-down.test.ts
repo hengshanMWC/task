@@ -6,19 +6,26 @@ describe('test', () => {
   test('default', async () => {
     const time = 60
     const task = new CountDown()
-    vi.useFakeTimers()
-    task.start()
+    task.start({
+      callback(ctx) {
+        console.log(1, ctx)
+      },
+    })
       .then(() => {
         if (task.ctx) {
           expect(task.ctx.time).toBe(time)
         }
       })
   })
+  // test('default', async () => {
+  //   const time = 60
+  //   const task = new CountDown()
+  //   vi.useFakeTimers()
+  //   task.start()
+  //     .then(() => {
+  //       if (task.ctx) {
+  //         expect(task.ctx.time).toBe(time)
+  //       }
+  //     })
+  // })
 })
-function a() {
-  const task = new AbmaoTask.CountDown()
-  task.start()
-    .then(() => {
-      console.log(task)
-    })
-}
