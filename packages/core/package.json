@@ -22,7 +22,6 @@
     "test:cov": "vitest --coverage"
   },
   "devDependencies": {
-    "happy-dom": "^8.4.0",
     "jsdom": "^21.1.0"
   }
 }
