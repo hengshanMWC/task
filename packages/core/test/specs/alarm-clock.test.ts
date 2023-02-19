@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 import type { AlarmClockCtx } from '../../src/index'
-import { AlarmClock, AlarmClockStatus } from '../../src/index'
+import { AlarmClock, AlarmClockStatus, AlarmClockTimerGroup, timerGroup } from '../../src/index'
 import { wait } from '../utils'
 const time = 0.001
 /**
@@ -23,7 +23,7 @@ describe('test', () => {
     const callback = vi.fn((ctx: AlarmClockCtx) => {
       expect(ctx.endTime).not.toBe(endTime)
     })
-    const startTime = Date.now() + 1
+    const startTime = Date.now() + 100 // 为了测试wait状态
     const endTime = startTime + 1
     const handlesSuccess = vi.fn(() => {
       if (task.ctx) {
@@ -45,7 +45,7 @@ describe('test', () => {
     expect(handlesSuccess).toHaveBeenCalled()
   })
   test('cancel', async () => {
-    const task = new AlarmClock()
+    const task = new AlarmClock(AlarmClockTimerGroup.TIMEOUT)
     const handlesSuccess = vi.fn()
     const callback = vi.fn()
     const p1 = task.start({ time, callback })
@@ -53,7 +53,21 @@ describe('test', () => {
     task.cancel()
     await wait()
     const p2 = task.start({
-      time: 1,
+      time,
+    })
+    expect(p2).not.toBe(p1)
+    await p2
+    expect(callback).not.toHaveBeenCalled()
+    expect(handlesSuccess).not.toHaveBeenCalled()
+  })
+  test('reset', async () => {
+    const task = new AlarmClock(timerGroup[AlarmClockTimerGroup.TIMEOUT])
+    const handlesSuccess = vi.fn()
+    const callback = vi.fn()
+    const p1 = task.start({ time, callback })
+      .then(handlesSuccess)
+    const p2 = task.reset({
+      time,
     })
     expect(p2).not.toBe(p1)
     await p2

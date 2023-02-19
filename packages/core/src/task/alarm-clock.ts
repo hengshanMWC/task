@@ -145,4 +145,5 @@ export {
   AlarmClockStatus,
   AlarmClockTimerGroup,
   TimerGroup,
+  timerGroup,
 }
