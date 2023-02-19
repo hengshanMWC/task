@@ -4,7 +4,7 @@ import { Task } from './task'
 class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
   timer: NodeJS.Timeout
   timerGroup: TimerGroup
-  constructor(timerGroupValue: AlarmClockTimerGroup | TimerGroup = AlarmClockTimerGroup.TIMEOUT) {
+  constructor(timerGroupValue: AlarmClockTimerGroup | TimerGroup = AlarmClockTimerGroup.FRAME) {
     super()
     if (typeof timerGroupValue === 'number') {
       this.timerGroup = timerGroup[timerGroupValue]
@@ -122,6 +122,7 @@ enum AlarmClockStatus {
 }
 
 enum AlarmClockTimerGroup {
+  FRAME,
   TIMEOUT,
 }
 interface TimerGroup {
@@ -130,6 +131,10 @@ interface TimerGroup {
 }
 
 const timerGroup: Record<AlarmClockTimerGroup, TimerGroup> = {
+  [AlarmClockTimerGroup.FRAME]: {
+    stop: () => requestAnimationFrame,
+    timing: () => cancelAnimationFrame,
+  },
   [AlarmClockTimerGroup.TIMEOUT]: {
     stop: () => clearTimeout,
     timing: () => setTimeout,
