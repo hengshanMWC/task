@@ -15,3 +15,10 @@ describe('test', () => {
       })
   })
 })
+function a() {
+  const task = new AbmaoTask.CountDown()
+  task.start()
+    .then(() => {
+      console.log(task)
+    })
+}
