@@ -46,12 +46,11 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
   }
 
   private createContext(params?: AlarmClockParams): AlarmClockCtx {
-    const currentTime = Date.now()
     const time = params?.time || 60
+    const currentTime = Date.now()
     const startTime = params?.startTime || currentTime
     const endTime = params?.endTime || startTime + time * 1000
     return {
-      time,
       startTime,
       currentTime,
       endTime,
@@ -87,12 +86,12 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
   }
 
   stop() {
-    this.timerGroup.stop()(this.timer)
+    this.timerGroup.stop(this.timer)
     return this
   }
 
   timing(fn: Function) {
-    return this.timerGroup.timing()(fn)
+    return this.timerGroup.timing(fn)
   }
 }
 
@@ -105,7 +104,6 @@ interface AlarmClockParams {
 }
 
 interface AlarmClockCtx {
-  time: number
   startTime: number
   currentTime: number
   endTime: number
@@ -126,18 +124,18 @@ enum AlarmClockTimerGroup {
   TIMEOUT,
 }
 interface TimerGroup {
-  stop: () => Function
-  timing: () => Function
+  timing: (...params: any) => any
+  stop: (...params: any) => any
 }
 
 const timerGroup: Record<AlarmClockTimerGroup, TimerGroup> = {
   [AlarmClockTimerGroup.FRAME]: {
-    stop: () => requestAnimationFrame,
-    timing: () => cancelAnimationFrame,
+    timing: (...params: Parameters<typeof requestAnimationFrame>) => requestAnimationFrame(...params),
+    stop: (...params: Parameters<typeof cancelAnimationFrame>) => cancelAnimationFrame(...params),
   },
   [AlarmClockTimerGroup.TIMEOUT]: {
-    stop: () => clearTimeout,
-    timing: () => setTimeout,
+    timing: (...params: Parameters<typeof setTimeout>) => setTimeout(...params),
+    stop: (...params: Parameters<typeof clearTimeout>) => clearTimeout(...params),
   },
 }
 export {
