@@ -1,11 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
-import { CountDown } from '../../src/index'
+import { AlarmClock } from '../../src/index'
 import { wait } from '../utils'
 
 describe('test', () => {
   test('default', async () => {
     const time = 60
-    const task = new CountDown()
+    const task = new AlarmClock()
     task.start({
       callback(ctx) {
         console.log(1, ctx)
@@ -19,7 +19,7 @@ describe('test', () => {
   })
   // test('default', async () => {
   //   const time = 60
-  //   const task = new CountDown()
+  //   const task = new AlarmClock()
   //   vi.useFakeTimers()
   //   task.start()
   //     .then(() => {

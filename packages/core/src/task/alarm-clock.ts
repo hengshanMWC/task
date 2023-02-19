@@ -1,10 +1,10 @@
 import type { Next } from './task'
 import { Task } from './task'
 
-class CountDown extends Task<CountDownParams, CountDownCtx> {
+class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
   timer: NodeJS.Timeout
   timerGroup: TimerGroup
-  constructor(timerGroupValue: CountDownTimerGroup | TimerGroup = CountDownTimerGroup.TIMEOUT) {
+  constructor(timerGroupValue: AlarmClockTimerGroup | TimerGroup = AlarmClockTimerGroup.TIMEOUT) {
     super()
     if (typeof timerGroupValue === 'number') {
       this.timerGroup = timerGroup[timerGroupValue]
@@ -31,7 +31,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
     this.stop()
   }
 
-  protected createCtx(params?: CountDownParams) {
+  protected createCtx(params?: AlarmClockParams) {
     if (!this.ctx) {
       return this.createContext(params)
     }
@@ -45,7 +45,7 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
     }
   }
 
-  private createContext(params?: CountDownParams): CountDownCtx {
+  private createContext(params?: AlarmClockParams): AlarmClockCtx {
     const currentTime = Date.now()
     const time = params?.time || 60
     const startTime = params?.startTime || currentTime
@@ -55,34 +55,34 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
       startTime,
       currentTime,
       endTime,
-      get endCountDownTime() {
+      get endAlarmClockTime() {
         return Math.max(this.endTime - this.currentTime, 0)
       },
-      get startCountDownTime() {
+      get startAlarmClockTime() {
         return Math.max(this.startTime - this.currentTime, 0)
       },
       get status() {
-        if (!this.endCountDownTime) {
-          return CountDownStatus.END
+        if (!this.endAlarmClockTime) {
+          return AlarmClockStatus.END
         }
-        else if (!this.startCountDownTime) {
-          return CountDownStatus.ACTIVITY
+        else if (!this.startAlarmClockTime) {
+          return AlarmClockStatus.ACTIVITY
         }
         else {
-          return CountDownStatus.WAIT
+          return AlarmClockStatus.WAIT
         }
       },
       callback: params?.callback,
     }
   }
 
-  private dealWith(next: Next, ctx: CountDownCtx) {
+  private dealWith(next: Next, ctx: AlarmClockCtx) {
     next(() => {
-      if (ctx.endCountDownTime) {
+      if (ctx.endAlarmClockTime) {
         ctx.currentTime = Date.now()
       }
       ctx.callback && ctx.callback(ctx)
-      return ctx.status === CountDownStatus.END
+      return ctx.status === AlarmClockStatus.END
     })
   }
 
@@ -96,32 +96,32 @@ class CountDown extends Task<CountDownParams, CountDownCtx> {
   }
 }
 
-type CountDownCallback = (ctx: CountDownCtx) => void
-interface CountDownParams {
+type AlarmClockCallback = (ctx: AlarmClockCtx) => void
+interface AlarmClockParams {
   time?: number
   startTime?: number
   endTime?: number
-  callback?: CountDownCallback
+  callback?: AlarmClockCallback
 }
 
-interface CountDownCtx {
+interface AlarmClockCtx {
   time: number
   startTime: number
   currentTime: number
   endTime: number
-  readonly endCountDownTime: number
-  readonly startCountDownTime: number
-  readonly status: CountDownStatus
-  callback?: CountDownCallback
+  readonly endAlarmClockTime: number
+  readonly startAlarmClockTime: number
+  readonly status: AlarmClockStatus
+  callback?: AlarmClockCallback
 }
 
-enum CountDownStatus {
+enum AlarmClockStatus {
   WAIT,
   ACTIVITY,
   END,
 }
 
-enum CountDownTimerGroup {
+enum AlarmClockTimerGroup {
   TIMEOUT,
 }
 interface TimerGroup {
@@ -129,17 +129,17 @@ interface TimerGroup {
   timing: () => Function
 }
 
-const timerGroup: Record<CountDownTimerGroup, TimerGroup> = {
-  [CountDownTimerGroup.TIMEOUT]: {
+const timerGroup: Record<AlarmClockTimerGroup, TimerGroup> = {
+  [AlarmClockTimerGroup.TIMEOUT]: {
     stop: () => clearTimeout,
     timing: () => setTimeout,
   },
 }
 export {
-  CountDown,
-  CountDownParams,
-  CountDownCtx,
-  CountDownStatus,
-  CountDownTimerGroup,
+  AlarmClock,
+  AlarmClockParams,
+  AlarmClockCtx,
+  AlarmClockStatus,
+  AlarmClockTimerGroup,
   TimerGroup,
 }
