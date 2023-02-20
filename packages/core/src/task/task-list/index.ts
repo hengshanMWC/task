@@ -1,16 +1,18 @@
 import type { BaseTask, TaskStatus } from '../../core'
 import type { Next } from '../task'
 import { Task } from '../task'
-import { getIndex, getIndexList, getList } from './utils'
+import { arrayDelete, getIndex, getIndexList, getList, getStatusTask, getTargetTaskList } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
-  status: TaskStatus = 'idle'
-  taskList: BaseTask[] = []
   protected maxSync = 1
 
   constructor(maxSync: number) {
     super()
     this.setMaxSync(maxSync)
+  }
+
+  get taskList() {
+    return this.ctx?.taskList || []
   }
 
   // 执行中队列
@@ -58,36 +60,6 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return Math.max(this.maxSync - this.activeTaskList.length, 0)
   }
 
-  pause(value?: TaskListParams) {
-    this.getTargetTaskList(this.prepareTaskList, value).forEach(task => task.pause())
-    if (this.resetStatus().status === 'pause') {
-      return this
-    }
-    else {
-      this.start()
-      return this
-    }
-  }
-
-  cancel(value?: TaskListParams) {
-    this.getTargetTaskList(this.taskList, value).forEach((task) => {
-      this.pop(this.taskList, task)
-      task.cancel()
-    })
-    if (this.resetStatus('end').status === 'end') {
-      return this.clear()
-    }
-    else {
-      this.start()
-      return this
-    }
-  }
-
-  reset(value?: TaskListParams) {
-    this.getTargetTaskList(this.taskList, value).forEach(task => task.cancel())
-    return this.resetStatus().start()
-  }
-
   setMaxSync(index: number) {
     const maxSync = Math.max(index, 0)
     const num = maxSync - this.maxSync
@@ -107,11 +79,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     if (!this.ctx)
       return
     // 获取源的index
-    const originIndex = getIndexList(this.ctx?.taskList, originValue)[0]
+    const originIndex = getIndexList(this.taskList, originValue)[0]
     // 判断是正常的index
     if (!isNaN(originIndex)) {
       const originTask = this.taskList.splice(originIndex, 1)[0]
-      const targetIndex = getIndexList(this.ctx?.taskList, targetValue || 0)[0]
+      const targetIndex = getIndexList(this.taskList, targetValue || 0)[0]
       if (!isNaN(targetIndex)) {
         this.taskList.splice(targetIndex, 0, originTask)
       }
@@ -140,9 +112,19 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   protected interceptPause(params?: TaskListParams) {
     const ctx = this.ctx
     if (ctx) {
-      getList(this.executableTaskQueue, params).forEach((task) => {
+      getList(ctx.taskList, params).forEach((task) => {
         task.pause()
-        this.pop(ctx.taskQueue, task)
+        arrayDelete(ctx.taskQueue, task)
+      })
+    }
+  }
+
+  protected interceptCancel(params?: TaskListParams) {
+    const ctx = this.ctx
+    if (ctx) {
+      getList(ctx.taskList, params).forEach((task) => {
+        task.cancel()
+        arrayDelete(ctx.taskQueue, task)
       })
     }
   }
@@ -150,9 +132,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   private getNotActiveTask(params?: TaskListParams) {
     if (!this.ctx)
       return []
-    return getList(this.ctx.taskList, params).filter((task) => {
+    return getList(this.taskList, params).filter((task) => {
       if (this.ctx) {
-        const index = getIndex(this.ctx.taskList, task)
+        const index = getIndex(this.taskList, task)
         return index === -1 || this.ctx?.taskList[index].status !== 'active'
       }
       else {
@@ -174,40 +156,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     this.ctx?.taskQueue.forEach((item) => {
       item.start()
         .catch(err => this.triggerReject(err))
-        .finally(() => next(!this.ctx?.taskList.length))
+        .finally(() => next(!this.taskList.length))
     })
     return this
-  }
-
-  private pop(list: BaseTask[], task: BaseTask) {
-    const index = getIndex(list, task)
-    if (index !== -1) {
-      list.splice(index, 1)
-    }
-    return this
-  }
-
-  private resetStatus(status: TaskStatus = 'idle') {
-    const taskListLength = this.taskList.length
-    if (this.prepareTaskList.length) {
-      this.status = 'active'
-    }
-    else if (this.pauseTaskList.length === taskListLength) {
-      this.status = 'pause'
-    }
-    else {
-      this.status = status
-    }
-    return this
-  }
-
-  private getTargetTaskList(originTask: BaseTask[], value?: TaskListParams) {
-    if (value === undefined) {
-      return originTask
-    }
-    else {
-      return getList(originTask, value).filter(task => originTask.includes(task))
-    }
   }
 }
 
@@ -216,11 +167,6 @@ type TaskListParams = valueType | valueType[]
 interface TaskListCtx {
   taskList: BaseTask[]
   taskQueue: BaseTask[]
-}
-
-function getStatusTask(list: BaseTask[], status: TaskStatus,
-) {
-  return list.filter(item => item.status === status)
 }
 
 export {
