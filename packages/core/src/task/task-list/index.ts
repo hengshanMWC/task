@@ -1,8 +1,9 @@
-import type { BaseTask, TaskStatus } from '../core'
-import type { Next } from './task'
-import { Task } from './task'
+import type { BaseTask, TaskStatus } from '../../core'
+import type { Next } from '../task'
+import { Task } from '../task'
+import { getIndex, getIndexList, getItem, getList } from './utils'
 
-class TaskList extends Task<valuesType> {
+class TaskList extends Task<valuesType, TaskListCtx> {
   status: TaskStatus = 'idle'
   taskList: BaseTask[] = []
   protected maxSync = 1
@@ -57,6 +58,13 @@ class TaskList extends Task<valuesType> {
     return Math.max(this.maxSync - this.activeTaskList.length, 0)
   }
 
+  protected interceptPause(params?: valuesType) {
+    const list = this.ctx?.taskQueue.concat() || []
+    list.forEach((item) => {
+      item.pause()
+    })
+  }
+
   pause(value?: valuesType) {
     this.getTargetTaskList(this.prepareTaskList, value).forEach(task => task.pause())
     if (this.resetStatus().status === 'pause') {
@@ -70,7 +78,7 @@ class TaskList extends Task<valuesType> {
 
   cancel(value?: valuesType) {
     this.getTargetTaskList(this.taskList, value).forEach((task) => {
-      this.pop(task)
+      this.pop(this.taskList, task)
       task.cancel()
     })
     if (this.resetStatus('end').status === 'end') {
@@ -103,12 +111,14 @@ class TaskList extends Task<valuesType> {
 
   // 移动到对应的位置
   move(originValue: valueType, targetValue?: valueType) {
+    if (!this.ctx)
+      return
     // 获取源的index
-    const originIndex = this.getIndexs(originValue)[0]
+    const originIndex = getIndexList(this.ctx?.taskList, originValue)[0]
     // 判断是正常的index
     if (!isNaN(originIndex)) {
       const originTask = this.taskList.splice(originIndex, 1)[0]
-      const targetIndex = this.getIndexs(targetValue || 0)[0]
+      const targetIndex = getIndexList(this.ctx?.taskList, targetValue || 0)[0]
       if (!isNaN(targetIndex)) {
         this.taskList.splice(targetIndex, 0, originTask)
       }
@@ -116,55 +126,72 @@ class TaskList extends Task<valuesType> {
     return this
   }
 
-  getTask(value: valueType) {
-    return typeof value === 'number' ? this.taskList[value] : value
-  }
-
-  getTasks(value?: valuesType): BaseTask[] {
-    if (value === undefined) {
-      return this.taskList
+  protected createCtx(params?: valuesType): TaskListCtx | undefined {
+    let list: BaseTask[] = []
+    if (params) {
+      list = this.getNotActiveTask(params)
     }
-    const arr = Array.isArray(value) ? value : [value]
-    return arr.map(value => this.getTask(value))
-  }
-
-  getIndex(value: valueType) {
-    return typeof value === 'number' ? value : this.taskList.findIndex(task => task === value)
-  }
-
-  getIndexs(value?: valuesType): number[] {
-    if (value === undefined) {
-      return this.taskList.map((task, index) => index)
+    return {
+      taskList: list,
+      taskQueue: this.createQueueTasks(list),
     }
-    const arr = Array.isArray(value) ? value : [value]
-    return arr.map(value => this.getIndex(value))
   }
 
-  protected run(value?: valuesType) {
-    // 筛选出不存在于队列的任务并且空闲的任务
-    const list = this.getTasks(value).filter((task) => {
-      const index = this.getIndex(task)
-      return index === -1 && this.taskList[index].status !== 'active'
-    })
-
-    // 放到预备队列
-    this.taskList.push(...list.splice(0, this.seat))
+  protected inProgress(params?: valuesType) {
+    const list = this.getNotActiveTask(params)
+    this.ctx?.taskList.push(...list)
+    this.ctx?.taskQueue.push(...this.createQueueTasks(list))
     return this
   }
+
+  private getNotActiveTask(params?: valuesType) {
+    if (!this.ctx)
+      return []
+    return getList(this.ctx.taskList, params).filter((task) => {
+      if (this.ctx) {
+        const index = getIndex(this.ctx.taskList, task)
+        return index === -1 || this.ctx?.taskList[index].status !== 'active'
+      }
+      else {
+        return false
+      }
+    })
+  }
+
+  private createQueueTasks(list: BaseTask | BaseTask[]) {
+    const tasks = Array.isArray(list) ? list : []
+    return tasks.map(task => this.createQueueTask(task))
+  }
+
+  private createQueueTask(task: BaseTask) {
+    return task
+  }
+
+  // protected run(value?: valuesType) {
+  //   // 筛选出不存在于队列的任务并且空闲的任务
+  //   const list = getList(value).filter((task) => {
+  //     const index = getIndex(task)
+  //     return index === -1 && this.taskList[index].status !== 'active'
+  //   })
+
+  //   // 放到预备队列
+  //   this.taskList.push(...list.splice(0, this.seat))
+  //   return this
+  // }
 
   protected cut(next: Next) {
-    this.executableTaskList.forEach((task) => {
-      task.start()
+    this.ctx?.taskQueue.forEach((item) => {
+      item.start()
         .catch(err => this.triggerReject(err))
-        .finally(() => next(!this.taskList.length))
+        .finally(() => next(!this.ctx?.taskList.length))
     })
     return this
   }
 
-  private pop(task: BaseTask) {
-    const index = this.getIndex(task)
+  private pop(list: BaseTask[], task: BaseTask) {
+    const index = getIndex(list, task)
     if (index !== -1) {
-      this.taskList.splice(index, 1)
+      list.splice(index, 1)
     }
     return this
   }
@@ -188,13 +215,17 @@ class TaskList extends Task<valuesType> {
       return originTask
     }
     else {
-      return this.getTasks(value).filter(task => originTask.includes(task))
+      return getList(originTask, value).filter(task => originTask.includes(task))
     }
   }
 }
 
 type valueType = number | BaseTask
 type valuesType = valueType | valueType[]
+interface TaskListCtx {
+  taskList: BaseTask[]
+  taskQueue: BaseTask[]
+}
 
 function getStatusTask(list: BaseTask[], status: TaskStatus,
 ) {
