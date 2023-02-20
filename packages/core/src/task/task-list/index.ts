@@ -1,7 +1,7 @@
 import type { BaseTask, TaskStatus } from '../../core'
 import type { Next } from '../task'
 import { Task } from '../task'
-import { getIndex, getIndexList, getItem, getList } from './utils'
+import { getIndex, getIndexList, getList } from './utils'
 
 class TaskList extends Task<valuesType, TaskListCtx> {
   status: TaskStatus = 'idle'
@@ -59,10 +59,14 @@ class TaskList extends Task<valuesType, TaskListCtx> {
   }
 
   protected interceptPause(params?: valuesType) {
-    const list = this.ctx?.taskQueue.concat() || []
-    list.forEach((item) => {
-      item.pause()
-    })
+    const ctx = this.ctx
+    if (ctx) {
+      const list = getList(ctx.taskQueue, params)
+      list.forEach((task) => {
+        task.pause()
+        this.pop(ctx.taskQueue, task)
+      })
+    }
   }
 
   pause(value?: valuesType) {
@@ -166,18 +170,6 @@ class TaskList extends Task<valuesType, TaskListCtx> {
   private createQueueTask(task: BaseTask) {
     return task
   }
-
-  // protected run(value?: valuesType) {
-  //   // 筛选出不存在于队列的任务并且空闲的任务
-  //   const list = getList(value).filter((task) => {
-  //     const index = getIndex(task)
-  //     return index === -1 && this.taskList[index].status !== 'active'
-  //   })
-
-  //   // 放到预备队列
-  //   this.taskList.push(...list.splice(0, this.seat))
-  //   return this
-  // }
 
   protected cut(next: Next) {
     this.ctx?.taskQueue.forEach((item) => {

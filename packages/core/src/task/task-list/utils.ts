@@ -25,7 +25,6 @@ function getIndexList(list: BaseTask[], value?: valuesType): number[] {
 }
 
 export {
-  getItem,
   getList,
   getIndex,
   getIndexList,
