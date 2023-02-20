@@ -44,8 +44,8 @@ class TaskList extends Task<valuesType, TaskListCtx> {
   }
 
   // 可执行队列
-  get executableTaskList() {
-    return this.prepareTaskList.slice(0, this.seat)
+  get executableTaskQueue() {
+    return this.ctx?.taskQueue.slice(0, this.seat) || []
   }
 
   // 未结束队列
@@ -56,17 +56,6 @@ class TaskList extends Task<valuesType, TaskListCtx> {
   // 剩余可执行数量
   get seat() {
     return Math.max(this.maxSync - this.activeTaskList.length, 0)
-  }
-
-  protected interceptPause(params?: valuesType) {
-    const ctx = this.ctx
-    if (ctx) {
-      const list = getList(ctx.taskQueue, params)
-      list.forEach((task) => {
-        task.pause()
-        this.pop(ctx.taskQueue, task)
-      })
-    }
   }
 
   pause(value?: valuesType) {
@@ -146,6 +135,16 @@ class TaskList extends Task<valuesType, TaskListCtx> {
     this.ctx?.taskList.push(...list)
     this.ctx?.taskQueue.push(...this.createQueueTasks(list))
     return this
+  }
+
+  protected interceptPause(params?: valuesType) {
+    const ctx = this.ctx
+    if (ctx) {
+      getList(this.executableTaskQueue, params).forEach((task) => {
+        task.pause()
+        this.pop(ctx.taskQueue, task)
+      })
+    }
   }
 
   private getNotActiveTask(params?: valuesType) {
