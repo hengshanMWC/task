@@ -117,6 +117,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         arrayDelete(ctx.taskQueue, task)
       })
     }
+    return ctx?.taskQueue.length === 0
   }
 
   protected interceptCancel(params?: TaskListParams) {
@@ -127,6 +128,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         arrayDelete(ctx.taskQueue, task)
       })
     }
+    return ctx?.taskQueue.length === 0
   }
 
   private getNotActiveTask(params?: TaskListParams) {
