@@ -9,15 +9,15 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return this.createPromiseSingleton(params).currentPromise as Promise<any>
   }
 
-  pause() {
-    if (this.interceptPause() !== false) {
+  pause(params?: T) {
+    if (this.interceptPause(params) !== false) {
       this.status = 'pause'
     }
     return this
   }
 
-  cancel() {
-    if (this.interceptCancel() !== false) {
+  cancel(params?: T) {
+    if (this.interceptCancel(params) !== false) {
       this.status = 'end'
       this.ctx = undefined
       this.clear()
@@ -37,10 +37,10 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   protected abstract cut(next: Next): this
-  protected interceptPause(): any {
+  protected interceptPause(params?: T): any {
   }
 
-  protected interceptCancel(): any {
+  protected interceptCancel(params?: T): any {
   }
 
   protected run(params?: T) {
@@ -96,6 +96,13 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
         this.status = 'end'
       })
     }
+    else {
+      this.inProgress(params)
+    }
+    return this
+  }
+
+  protected inProgress(params?: T) {
     return this
   }
 
