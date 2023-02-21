@@ -61,16 +61,19 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   setMaxSync(index: number) {
+    const ctx = this.ctx
+    const oldMaxSync = this.maxSync
     const maxSync = Math.max(index, 0)
-    const num = maxSync - this.maxSync
-    if (num > 0) {
-      this.start(this.waitTaskList.splice(0, num))
-    }
-    else if (num < 0) {
-      const prepareTaskList = this.prepareTaskList.splice(num, Math.abs(num))
-      this.pause(prepareTaskList)
-    }
+    const num = maxSync - oldMaxSync
     this.maxSync = maxSync
+    if (ctx) {
+      if (num > 0) {
+        this.start(ctx?.taskQueue.splice(oldMaxSync, num))
+      }
+      else if (num < 0) {
+        this.pause(ctx?.taskQueue.splice(maxSync, Math.abs(num)))
+      }
+    }
     return this
   }
 
