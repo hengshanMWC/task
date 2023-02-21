@@ -59,8 +59,13 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   // 队列空闲
-  get standby() {
+  get idle() {
     return this.taskQueue.length === 0
+  }
+
+  // 结束
+  get end() {
+    return this.taskList.length === this.endTaskList.length
   }
 
   setMaxSync(index: number) {
@@ -132,7 +137,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         arrayDelete(ctx.taskQueue, task)
       })
     }
-    return this.standby
+    return this.idle
   }
 
   protected interceptCancel(params?: TaskListParams) {
@@ -143,16 +148,22 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         arrayDelete(ctx.taskQueue, task)
       })
     }
-    return this.standby
+    return this.idle
   }
 
   protected cut(next: Next) {
-    this.taskQueue.forEach((task) => {
-      task.start()
-        .then((...params) => this.callback && this.callback(task, ...params))
-        .catch(err => this.triggerReject(err))
-        .finally(() => next(!this.taskList.length))
-    })
+    if (this.end) {
+      next(true)
+    }
+    else {
+      this.taskQueue.forEach((task) => {
+        task.start()
+          .then((...params) => this.callback && this.callback(task, ...params))
+          .catch(err => this.triggerReject(err))
+          .finally(() => next(this.end))
+      })
+    }
+
     return this
   }
 }
