@@ -45,7 +45,7 @@ describe('test', () => {
     expect(handlesSuccess).toHaveBeenCalled()
   })
   test('cancel', async () => {
-    const task = new AlarmClock(AlarmClockTimerGroup.TIMEOUT)
+    const task = new AlarmClock(undefined, AlarmClockTimerGroup.TIMEOUT)
     const handlesSuccess = vi.fn()
     const callback = vi.fn()
     const p1 = task.start({ time, callback })
@@ -61,7 +61,7 @@ describe('test', () => {
     expect(handlesSuccess).not.toHaveBeenCalled()
   })
   test('reset', async () => {
-    const task = new AlarmClock(timerGroup[AlarmClockTimerGroup.TIMEOUT])
+    const task = new AlarmClock(undefined, timerGroup[AlarmClockTimerGroup.TIMEOUT])
     const handlesSuccess = vi.fn()
     const callback = vi.fn()
     const p1 = task.start({ time, callback })

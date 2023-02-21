@@ -10,16 +10,18 @@ describe('test', () => {
     p.then(() => {
       expect(task.status).toBe('end')
     })
+    const p2 = task.start()
     // 测试是否同一个Promise
-    expect(p).toBe(task.start())
+    expect(p).toBe(p2)
     expect(task.status).toBe('active')
     // 测试暂停
     task.pause()
     await wait()
     expect(task.status).toBe('pause')
     expect(value - 1).toBe(task.ctx)
+    const p3 = task.start()
     // 测试重新启动
-    expect(p).toBe(task.start())
+    expect(p).toBe(p3)
     expect(task.status).toBe('active')
   })
   test('cancel', () => {

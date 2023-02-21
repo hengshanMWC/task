@@ -127,11 +127,14 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   protected onExecute(params?: TaskListParams) {
     const ctx = this.ctx
     if (ctx) {
-      const list = getNotActiveTask(ctx.taskList, params)
-      ctx.taskList.push(...list)
-      ctx.taskQueue.push(...list)
+      this.addItems(params)
+      ctx.taskQueue.push(...getNotActiveTask(ctx.taskList, params))
     }
     return this
+  }
+
+  protected onProceed(params?: TaskListParams | undefined): void {
+    this.onExecute(params)
   }
 
   protected interceptPause(params?: TaskListParams) {
@@ -173,6 +176,18 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     }
 
     return this
+  }
+
+  private addItems(items?: TaskListParams) {
+    const ctx = this.ctx
+    if (ctx && items) {
+      const list = Array.isArray(items) ? items : [items]
+      list.forEach((item) => {
+        if (typeof item !== 'number' && !ctx.taskList.includes(item)) {
+          ctx.taskList.push(item)
+        }
+      })
+    }
   }
 }
 
