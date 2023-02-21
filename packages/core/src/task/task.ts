@@ -55,7 +55,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return params as CreateCtx<Ctx>
   }
 
-  protected proceed(params?: T) {}
+  protected onProceed(params?: T) {}
 
   private execute(next: Next, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param
@@ -81,7 +81,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   private createPromiseSingleton(params?: T) {
     if (this.status === 'pause') {
       this.status = 'active'
-      this.proceed(params)
+      this.onProceed(params)
       const next = this.createNext()
       this.cutter(next)
     }

@@ -37,7 +37,7 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
     }
   }
 
-  protected proceed() {
+  protected onProceed() {
     if (this.ctx) {
       const gap = Date.now() - this.ctx.currentTime
       this.ctx.currentTime += gap
