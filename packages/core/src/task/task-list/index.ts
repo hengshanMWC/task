@@ -97,22 +97,19 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this
   }
 
-  // TODO大问题
   protected createCtx(params?: TaskListParams): TaskListCtx | undefined {
-    const list: BaseTask[] = [...this.initList]
-    const taskList: BaseTask[] = []
-    const taskQueue: BaseTask[] = []
-    if (Array.isArray(params)) {
-      if (typeof params[0] === 'number') {
-        getNotActiveTask(this.initList, params)
-      }
-      else {
-        // this.initList
-      }
+    const taskList: BaseTask[] = [...this.initList]
+    if (Array.isArray(params) && typeof params[0] !== 'number') {
+      taskList.push(...params as BaseTask[])
     }
+    else if (typeof params !== 'number') {
+      taskList.push(params as BaseTask)
+    }
+
+    const taskQueue: BaseTask[] = getNotActiveTask(taskList, params)
     return {
-      taskList: list,
-      taskQueue: this.createQueueTasks(list),
+      taskList,
+      taskQueue,
     }
   }
 
@@ -121,7 +118,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     if (ctx) {
       const list = getNotActiveTask(ctx.taskList, params)
       ctx.taskList.push(...list)
-      ctx.taskQueue.push(...this.createQueueTasks(list))
+      ctx.taskQueue.push(...list)
     }
     return this
   }
@@ -146,15 +143,6 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       })
     }
     return this.standby
-  }
-
-  private createQueueTasks(list: BaseTask | BaseTask[]) {
-    const tasks = Array.isArray(list) ? list : []
-    return tasks.map(task => this.createQueueTask(task))
-  }
-
-  private createQueueTask(task: BaseTask) {
-    return task
   }
 
   protected cut(next: Next) {

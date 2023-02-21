@@ -39,18 +39,9 @@ function getStatusTask(list: BaseTask[], status: TaskStatus,
 
 function getNotActiveTask(list: BaseTask[], params?: TaskListParams) {
   return getList(list, params).filter((task) => {
-    const index = getIndex(this.taskList, task)
+    const index = getIndex(list, task)
     return index === -1 || list[index]?.status !== 'active'
   })
-}
-
-function getTargetTaskList(originTask: BaseTask[], value?: TaskListParams) {
-  if (value === undefined) {
-    return originTask
-  }
-  else {
-    return getList(originTask, value).filter(task => originTask.includes(task))
-  }
 }
 
 export {
