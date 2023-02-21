@@ -107,7 +107,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     if (Array.isArray(params) && typeof params[0] !== 'number') {
       list.push(...params as BaseTask[])
     }
-    else if (typeof params !== 'number') {
+    else if (params !== undefined && typeof params !== 'number') {
       list.push(params as BaseTask)
     }
 
