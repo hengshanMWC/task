@@ -102,7 +102,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     }
   }
 
-  protected inProgress(params?: TaskListParams) {
+  protected onExecut(params?: TaskListParams) {
     const list = this.getNotActiveTask(params)
     this.ctx?.taskList.push(...list)
     this.ctx?.taskQueue.push(...this.createQueueTasks(list))

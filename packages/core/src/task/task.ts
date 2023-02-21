@@ -97,12 +97,12 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
       })
     }
     else {
-      this.inProgress(params)
+      this.onExecut(params)
     }
     return this
   }
 
-  protected inProgress(params?: T) {
+  protected onExecut(params?: T) {
     return this
   }
 
