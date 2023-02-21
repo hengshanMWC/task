@@ -1,9 +1,15 @@
 import { describe, expect, test, vi } from 'vitest'
-import { AlarmClock, TaskList } from '../../src'
+import { TaskList } from '../../src'
 describe('test', () => {
   test('start', async () => {
+    const handleSuccess = vi.fn()
     const taskList = new TaskList()
-    // const  = new AlarmClock()
-    taskList.start()
+    try {
+      await taskList.start()
+      handleSuccess()
+    }
+    catch {
+    }
+    expect(handleSuccess).toHaveBeenCalled()
   })
 })
