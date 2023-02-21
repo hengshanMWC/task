@@ -1,4 +1,4 @@
-import type { BaseTask, TaskStatus } from '../../core'
+import type { BaseTask } from '../../core'
 import type { Next } from '../task'
 import { Task } from '../task'
 import { arrayDelete, getIndex, getIndexList, getList, getStatusTask, getTargetTaskList } from './utils'
@@ -13,6 +13,10 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
   get taskList() {
     return this.ctx?.taskList || []
+  }
+
+  get taskQueue() {
+    return this.ctx?.taskQueue || []
   }
 
   // 执行中队列
@@ -35,19 +39,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return getStatusTask(this.taskList, 'end')
   }
 
-  // 预备队列
-  get prepareTaskList() {
-    return this.activeTaskList.concat(this.idleTaskList)
-  }
-
-  // 等待队列
-  get waitTaskList() {
-    return this.idleTaskList.concat(this.pauseTaskList)
-  }
-
-  // 可执行队列
+  // 执行队列
   get executableTaskQueue() {
-    return this.ctx?.taskQueue.slice(0, this.seat) || []
+    return this.taskQueue.slice(0, this.seat)
   }
 
   // 未结束队列
@@ -57,7 +51,12 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
   // 剩余可执行数量
   get seat() {
-    return Math.max(this.maxSync - this.activeTaskList.length, 0)
+    return Math.max(this.maxSync - this.taskQueue.length, 0)
+  }
+
+  // 队列空闲
+  get standby() {
+    return this.taskQueue.length === 0
   }
 
   setMaxSync(index: number) {
@@ -68,10 +67,10 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     this.maxSync = maxSync
     if (ctx) {
       if (num > 0) {
-        this.start(ctx?.taskQueue.splice(oldMaxSync, num))
+        this.start(ctx.taskQueue.splice(oldMaxSync, num))
       }
       else if (num < 0) {
-        this.pause(ctx?.taskQueue.splice(maxSync, Math.abs(num)))
+        this.pause(ctx.taskQueue.splice(maxSync, Math.abs(num)))
       }
     }
     return this
@@ -120,7 +119,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         arrayDelete(ctx.taskQueue, task)
       })
     }
-    return ctx?.taskQueue.length === 0
+    return this.standby
   }
 
   protected interceptCancel(params?: TaskListParams) {
@@ -131,20 +130,16 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         arrayDelete(ctx.taskQueue, task)
       })
     }
-    return ctx?.taskQueue.length === 0
+    return this.standby
   }
 
   private getNotActiveTask(params?: TaskListParams) {
-    if (!this.ctx)
+    const ctx = this.ctx
+    if (!ctx)
       return []
-    return getList(this.taskList, params).filter((task) => {
-      if (this.ctx) {
-        const index = getIndex(this.taskList, task)
-        return index === -1 || this.ctx?.taskList[index].status !== 'active'
-      }
-      else {
-        return false
-      }
+    return getList(ctx.taskList, params).filter((task) => {
+      const index = getIndex(this.taskList, task)
+      return index === -1 || ctx.taskList[index]?.status !== 'active'
     })
   }
 
@@ -158,7 +153,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected cut(next: Next) {
-    this.ctx?.taskQueue.forEach((item) => {
+    this.taskQueue.forEach((item) => {
       item.start()
         .catch(err => this.triggerReject(err))
         .finally(() => next(!this.taskList.length))
