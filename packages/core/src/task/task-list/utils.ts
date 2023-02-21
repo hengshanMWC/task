@@ -1,5 +1,6 @@
 import type { BaseTask, TaskStatus } from '../../core'
 import type { TaskListParams, valueType } from './index'
+
 function getItem(list: BaseTask[], value: valueType) {
   return typeof value === 'number' ? list[value] : value
 }
@@ -36,6 +37,13 @@ function getStatusTask(list: BaseTask[], status: TaskStatus,
   return list.filter(item => item.status === status)
 }
 
+function getNotActiveTask(list: BaseTask[], params?: TaskListParams) {
+  return getList(list, params).filter((task) => {
+    const index = getIndex(this.taskList, task)
+    return index === -1 || list[index]?.status !== 'active'
+  })
+}
+
 function getTargetTaskList(originTask: BaseTask[], value?: TaskListParams) {
   if (value === undefined) {
     return originTask
@@ -47,9 +55,8 @@ function getTargetTaskList(originTask: BaseTask[], value?: TaskListParams) {
 
 export {
   getList,
-  getIndex,
   getIndexList,
   arrayDelete,
   getStatusTask,
-  getTargetTaskList,
+  getNotActiveTask,
 }

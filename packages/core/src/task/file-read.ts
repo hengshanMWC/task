@@ -85,7 +85,7 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
     }
   }
 
-  protected createParams(params?: FileReadParams) {
+  protected startParams(params?: FileReadParams) {
     if (this.params !== undefined || params !== undefined) {
       return {
         ...this.params,

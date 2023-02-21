@@ -1,14 +1,16 @@
 import type { BaseTask } from '../../core'
 import type { Next } from '../task'
 import { Task } from '../task'
-import { arrayDelete, getIndex, getIndexList, getList, getStatusTask, getTargetTaskList } from './utils'
+import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
   private callback?: (task: BaseTask, params: any) => void
+  private initList: BaseTask[]
 
-  constructor(callback?: TaskList['callback'], maxSync = 1) {
+  constructor(list: BaseTask[] = [], callback?: TaskList['callback'], maxSync = 1) {
     super()
+    this.initList = list
     this.setMaxSync(maxSync)
     this.callback = callback
   }
@@ -95,10 +97,18 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this
   }
 
+  // TODO大问题
   protected createCtx(params?: TaskListParams): TaskListCtx | undefined {
-    let list: BaseTask[] = []
-    if (params) {
-      list = this.getNotActiveTask(params)
+    const list: BaseTask[] = [...this.initList]
+    const taskList: BaseTask[] = []
+    const taskQueue: BaseTask[] = []
+    if (Array.isArray(params)) {
+      if (typeof params[0] === 'number') {
+        getNotActiveTask(this.initList, params)
+      }
+      else {
+        // this.initList
+      }
     }
     return {
       taskList: list,
@@ -107,9 +117,12 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected onExecute(params?: TaskListParams) {
-    const list = this.getNotActiveTask(params)
-    this.ctx?.taskList.push(...list)
-    this.ctx?.taskQueue.push(...this.createQueueTasks(list))
+    const ctx = this.ctx
+    if (ctx) {
+      const list = getNotActiveTask(ctx.taskList, params)
+      ctx.taskList.push(...list)
+      ctx.taskQueue.push(...this.createQueueTasks(list))
+    }
     return this
   }
 
@@ -133,16 +146,6 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       })
     }
     return this.standby
-  }
-
-  private getNotActiveTask(params?: TaskListParams) {
-    const ctx = this.ctx
-    if (!ctx)
-      return []
-    return getList(ctx.taskList, params).filter((task) => {
-      const index = getIndex(this.taskList, task)
-      return index === -1 || ctx.taskList[index]?.status !== 'active'
-    })
   }
 
   private createQueueTasks(list: BaseTask | BaseTask[]) {

@@ -16,7 +16,7 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
     }
   }
 
-  protected createParams(params?: AlarmClockParams) {
+  protected startParams(params?: AlarmClockParams) {
     if (this.params !== undefined || params !== undefined) {
       return {
         ...this.params,
