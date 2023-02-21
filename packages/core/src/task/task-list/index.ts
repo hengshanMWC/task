@@ -98,14 +98,15 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected createCtx(params?: TaskListParams): TaskListCtx | undefined {
-    const taskList: BaseTask[] = [...this.initList]
+    const list: BaseTask[] = [...this.initList]
     if (Array.isArray(params) && typeof params[0] !== 'number') {
-      taskList.push(...params as BaseTask[])
+      list.push(...params as BaseTask[])
     }
     else if (typeof params !== 'number') {
-      taskList.push(params as BaseTask)
+      list.push(params as BaseTask)
     }
 
+    const taskList: BaseTask[] = [...new Set(list)]
     const taskQueue: BaseTask[] = getNotActiveTask(taskList, params)
     return {
       taskList,
