@@ -23,29 +23,39 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this.ctx?.taskQueue || []
   }
 
-  // 执行中队列
+  // 执行中列表
   get activeTaskList() {
     return getStatusTask(this.taskList, 'active')
   }
 
-  // 空闲队列
+  // 空闲列表
   get idleTaskList() {
     return getStatusTask(this.taskList, 'idle')
   }
 
-  // 暂停队列
+  // 暂停列表
   get pauseTaskList() {
     return getStatusTask(this.taskList, 'pause')
   }
 
-  // 结束队列
+  // 结束列表
   get endTaskList() {
     return getStatusTask(this.taskList, 'end')
   }
 
-  // 执行队列
+  // 可执行队列
   get executableTaskQueue() {
     return this.taskQueue.slice(0, this.seat)
+  }
+
+  // 执行中队列
+  get activeTaskQueue() {
+    return getStatusTask(this.executableTaskQueue, 'active')
+  }
+
+  // 等待可执行队列
+  get waitExecutableTaskQueue() {
+    return this.executableTaskQueue.slice(this.activeTaskQueue.length)
   }
 
   // 未结束队列
@@ -156,9 +166,12 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       next(true)
     }
     else {
-      this.taskQueue.forEach((task) => {
+      this.waitExecutableTaskQueue.forEach((task) => {
         task.start()
-          .then((...params) => this.callback && this.callback(task, ...params))
+          .then((...params) => {
+            this.callback && this.callback(task, ...params)
+            arrayDelete(this.taskQueue, task)
+          })
           .catch(err => this.triggerReject(err))
           .finally(() => next(this.end))
       })
