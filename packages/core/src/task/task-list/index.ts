@@ -43,9 +43,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return getStatusTask(this.taskList, 'end')
   }
 
-  // 可执行队列
+  // 执行队列
   get executableTaskQueue() {
-    return this.taskQueue.slice(0, this.seat)
+    return this.taskQueue.slice(0, this.maxSync)
   }
 
   // 执行中队列
@@ -55,17 +55,12 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
   // 等待可执行队列
   get waitExecutableTaskQueue() {
-    return this.executableTaskQueue.slice(this.activeTaskQueue.length)
+    return this.taskQueue.slice(this.activeTaskQueue.length)
   }
 
   // 未结束队列
   get undoneTaskList() {
     return this.taskList.filter(task => task.status !== 'end')
-  }
-
-  // 剩余可执行数量
-  get seat() {
-    return Math.max(this.maxSync - this.taskQueue.length, 0)
   }
 
   // 队列空闲
