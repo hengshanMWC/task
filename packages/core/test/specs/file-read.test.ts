@@ -13,7 +13,10 @@ describe('test', () => {
       progressFn(progress)
     })
     const file = createFileRead()
-    const fileRead = new FileRead(fn, FileReaderType.DATA_URL, 100)
+    const fileRead = new FileRead({
+      callback: fn,
+      type: FileReaderType.DATA_URL,
+    }, 100)
     expect(fileRead.readProgress).toBe(0)
     await fileRead.start({
       file,
@@ -26,10 +29,13 @@ describe('test', () => {
     const fn = vi.fn()
     const cd = vi.fn()
     const file = createFileRead()
-    const fileRead = new FileRead(fn, FileReaderType.BINARY_STRING)
+    const fileRead = new FileRead({
+      callback: fn,
+      type: FileReaderType.BINARY_STRING,
+    })
     await fileRead.start({
       file,
-      cd,
+      callback: cd,
       type: FileReaderType.TEXT,
     })
     expect(fn).not.toHaveBeenCalled()
@@ -42,7 +48,7 @@ describe('test', () => {
     const fileRead = new FileRead()
     const task = fileRead.start({
       file,
-      cd,
+      callback: cd,
     })
     task.then(handleSuccess)
     fileRead.pause()
@@ -61,7 +67,7 @@ describe('test', () => {
     const fileRead = new FileRead()
     const task = fileRead.start({
       file,
-      cd,
+      callback: cd,
     })
     task.then(handleSuccess)
     fileRead.cancel()
@@ -82,7 +88,7 @@ describe('test', () => {
     const fileRead = new FileRead()
     const task = fileRead.start({
       file,
-      cd,
+      callback: cd,
     })
     task.then(handleSuccess)
     const task2 = fileRead.reset({

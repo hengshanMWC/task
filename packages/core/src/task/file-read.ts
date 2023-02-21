@@ -2,20 +2,16 @@ import { Task } from './task'
 const BYTES_PER_CHUNK = 1200
 
 class FileRead extends Task<FileReadParams, FileReadCtx> {
-  private type: FileReaderType
   private bytesPerChunk = BYTES_PER_CHUNK
   private fileChunk = 0 // 文件的读取完成度
   private fileReader: FileReader
-  private cd?: (chunk: string | ArrayBuffer, progress: number, file: Blob) => void
-  constructor(cd?: FileRead['cd'], type: FileRead['type'] = FileReaderType.ARRAY_BUFFER, bytesPerChunk?: number) {
+  private params?: Partial<FileReadParams>
+  constructor(params?: FileRead['params'], bytesPerChunk?: number) {
     super()
-    this.type = type
-    if (cd) {
-      this.cd = cd
-    }
     if (bytesPerChunk) {
       this.bytesPerChunk = bytesPerChunk
     }
+    this.params = params
     this.fileReader = new FileReader()
     this.fileReader.addEventListener('error', () => {
       this.handleFileReaderError()
@@ -82,16 +78,25 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
     if (params) {
       return {
         file: params.file,
-        cd: params.cd || this.cd,
-        type: params.type || this.type,
+        callback: params.callback,
+        type: params.type || FileReaderType.ARRAY_BUFFER,
         startBlob: params.startBlob || 0,
       }
     }
   }
 
+  protected createParams(params?: FileReadParams) {
+    if (this.params !== undefined || params !== undefined) {
+      return {
+        ...this.params,
+        ...params,
+      } as FileReadParams
+    }
+  }
+
   private handleFileReaderLoad() {
-    if (this.ctx?.cd && this.ctx?.file && this.fileReader.result !== null) {
-      this.ctx.cd(this.fileReader.result, this.readProgress, this.ctx?.file)
+    if (this.ctx?.callback && this.ctx?.file && this.fileReader.result !== null) {
+      this.ctx.callback(this.fileReader.result, this.readProgress, this.ctx?.file)
     }
   }
 
@@ -100,18 +105,19 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
     this.interceptCancel()
   }
 }
+type FileReadCallback = (chunk: string | ArrayBuffer, progress: number, file: Blob) => void
 
 interface FileReadParams {
   file: Blob
-  cd?: FileRead['cd']
-  type?: FileRead['type']
+  callback?: FileReadCallback
+  type?: FileReaderType
   startBlob?: number
 }
 
 interface FileReadCtx {
   file: Blob
-  cd?: FileRead['cd']
-  type: FileRead['type']
+  callback?: FileReadCallback
+  type: FileReaderType
   startBlob: number
 }
 
@@ -125,4 +131,5 @@ enum FileReaderType {
 export {
   FileRead,
   FileReaderType,
+  FileReadCallback,
 }

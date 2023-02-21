@@ -6,7 +6,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   sign = 0
 
   start(params?: T): Promise<any> {
-    return this.createPromiseSingleton(params).currentPromise as Promise<any>
+    return this.createPromiseSingleton(this.createParams(params)).currentPromise as Promise<any>
   }
 
   pause(params?: T) {
@@ -56,6 +56,10 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   protected onProceed(params?: T) {}
+
+  protected createParams(params?: T) {
+    return params
+  }
 
   private execute(next: Next, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param

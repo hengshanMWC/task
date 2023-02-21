@@ -4,13 +4,24 @@ import { Task } from './task'
 class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
   timer: NodeJS.Timeout
   timerGroup: TimerGroup
-  constructor(timerGroupValue: AlarmClockTimerGroup | TimerGroup = AlarmClockTimerGroup.FRAME) {
+  private params?: AlarmClockParams
+  constructor(params?: AlarmClockParams, timerGroupValue: AlarmClockTimerGroup | TimerGroup = AlarmClockTimerGroup.FRAME) {
     super()
+    this.params = params
     if (typeof timerGroupValue === 'number') {
       this.timerGroup = timerGroup[timerGroupValue]
     }
     else {
       this.timerGroup = timerGroupValue
+    }
+  }
+
+  protected createParams(params?: AlarmClockParams) {
+    if (this.params !== undefined || params !== undefined) {
+      return {
+        ...this.params,
+        ...params,
+      } as AlarmClockParams
     }
   }
 
