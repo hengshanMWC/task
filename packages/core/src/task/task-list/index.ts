@@ -4,11 +4,13 @@ import { Task } from '../task'
 import { arrayDelete, getIndex, getIndexList, getList, getStatusTask, getTargetTaskList } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
-  protected maxSync = 1
+  private maxSync: number
+  private callback?: (task: BaseTask, params: any) => void
 
-  constructor(maxSync: number) {
+  constructor(callback?: TaskList['callback'], maxSync = 1) {
     super()
     this.setMaxSync(maxSync)
+    this.callback = callback
   }
 
   get taskList() {
@@ -153,8 +155,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected cut(next: Next) {
-    this.taskQueue.forEach((item) => {
-      item.start()
+    this.taskQueue.forEach((task) => {
+      task.start()
+        .then((...params) => this.callback && this.callback(task, ...params))
         .catch(err => this.triggerReject(err))
         .finally(() => next(!this.taskList.length))
     })
