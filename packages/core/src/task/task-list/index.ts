@@ -5,7 +5,8 @@ import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask } f
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
-  private callback?: (task: BaseTask, params: any) => void
+  private callback?: (task: BaseTask, params: any[]) => void
+  private errorCallback: (error: Error, task: BaseTask, taskList: TaskList) => Promise<void> = error => Promise.reject(error)
   private initList: BaseTask[]
 
   constructor(list: BaseTask[] = [], callback?: TaskList['callback'], maxSync = 1) {
@@ -107,6 +108,10 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this
   }
 
+  onError(errorCallback: TaskList['errorCallback']) {
+    this.errorCallback = errorCallback
+  }
+
   protected createCtx(params?: TaskListParams): TaskListCtx | undefined {
     const list: BaseTask[] = [...this.initList]
     if (Array.isArray(params) && typeof params[0] !== 'number') {
@@ -170,8 +175,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
             this.callback && this.callback(task, ...params)
             arrayDelete(this.taskQueue, task)
           })
-          .catch(err => this.triggerReject(err))
-          .finally(() => next(this.end))
+          .catch(error => this.errorCallback(error, task, this))
+          .then(() => next(this.end))
+          .catch(error => this.triggerReject(error))
       })
     }
 

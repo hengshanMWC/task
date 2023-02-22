@@ -36,13 +36,6 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return this
   }
 
-  protected abstract cut(next: Next): this
-  protected interceptPause(params?: T): any {
-  }
-
-  protected interceptCancel(params?: T): any {
-  }
-
   protected run(params?: T) {
     const ctx = this.createCtx(params)
     if (this.status === 'end' || ctx !== undefined) {
@@ -104,6 +97,13 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
       this.onExecute(params)
     }
     return this
+  }
+
+  protected abstract cut(next: Next): this
+  protected interceptPause(params?: T): any {
+  }
+
+  protected interceptCancel(params?: T): any {
   }
 
   protected onExecute(params?: T) {
