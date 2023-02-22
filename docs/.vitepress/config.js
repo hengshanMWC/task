@@ -1,17 +1,17 @@
 import { defineConfig } from 'vitepress'
 export default defineConfig({
-  title: 'lerna-template',
-  description: 'lerna模板',
+  title: 'task',
+  description: 'task',
   base: '/',
   themeConfig: {
-    siteTitle: 'lerna-template',
+    siteTitle: 'task',
     sidebar: [
       {
-        text: '介绍',
+        text: '指南',
         collapsible: true,
         items: [
           {
-            text: 'demo',
+            text: '简介',
             link: '/',
           },
         ],
