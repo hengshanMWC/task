@@ -21,18 +21,40 @@ describe('base', () => {
     const task = new AlarmClock({
       time: 0.001,
     })
-    const taskList = new TaskList([task])
+    const taskList = new TaskList([task], (item, params) => {
+      expect(item).toBe(task)
+      expect(params).toBeUndefined()
+    })
     const p1 = taskList.start()
+
+    expect(taskList.taskQueue[0]).toBe(task)
+    expect(taskList.taskList[0]).toBe(task)
+    expect(taskList.taskList.length).toBe(1)
+    expect(taskList.taskQueue.length).toBe(1)
+    expect(taskList.idleTaskList.length).toBe(0)
     expect(taskList.activeTaskList.length).toBe(1)
+    expect(taskList.undoneTaskList.length).toBe(1)
+
     p1.then(handleSuccess)
     taskList.pause()
+
+    expect(taskList.taskQueue.length).toBe(0)
     expect(taskList.activeTaskList.length).toBe(0)
     expect(taskList.pauseTaskList.length).toBe(1)
+
     await wait()
+
     expect(handleSuccess).not.toHaveBeenCalled()
+
     const p2 = taskList.start()
+
+    expect(taskList.taskQueue.length).toBe(1)
     expect(taskList.activeTaskList.length).toBe(1)
+
     await p2
+
+    expect(taskList.taskQueue.length).toBe(0)
+    expect(taskList.undoneTaskList.length).toBe(0)
     expect(taskList.endTaskList.length).toBe(1)
     expect(handleSuccess).toHaveBeenCalled()
     expect(p1).toBe(p2)
@@ -46,7 +68,9 @@ describe('base', () => {
     const taskList = new TaskList([task])
     const p1 = taskList.start()
     p1.then(handleSuccess)
+    expect(taskList.undoneTaskList.length).toBe(1)
     taskList.cancel()
+    expect(taskList.undoneTaskList.length).toBe(0)
     await wait()
     expect(handleSuccess).not.toHaveBeenCalled()
     const p2 = taskList.start([task])
