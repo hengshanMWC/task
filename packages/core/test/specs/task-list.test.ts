@@ -23,12 +23,17 @@ describe('base', () => {
     })
     const taskList = new TaskList([task])
     const p1 = taskList.start()
+    expect(taskList.activeTaskList.length).toBe(1)
     p1.then(handleSuccess)
     taskList.pause()
+    expect(taskList.activeTaskList.length).toBe(0)
+    expect(taskList.pauseTaskList.length).toBe(1)
     await wait()
     expect(handleSuccess).not.toHaveBeenCalled()
     const p2 = taskList.start()
+    expect(taskList.activeTaskList.length).toBe(1)
     await p2
+    expect(taskList.endTaskList.length).toBe(1)
     expect(handleSuccess).toHaveBeenCalled()
     expect(p1).toBe(p2)
   })
@@ -69,6 +74,6 @@ describe('base', () => {
   })
 })
 
-describe('ability', () => {
+// describe('ability', () => {
 
-})
+// })
