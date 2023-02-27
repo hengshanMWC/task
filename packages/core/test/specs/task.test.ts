@@ -7,7 +7,8 @@ describe('test', () => {
     const task = new TestTask()
     expect(task.status).toBe('idle')
     const p = task.start(value)
-    p.then(() => {
+    p.then((t) => {
+      expect(t).toBe(task)
       expect(task.status).toBe('end')
     })
     const p2 = task.start()

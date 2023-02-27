@@ -21,9 +21,8 @@ describe('base', () => {
     const task = new AlarmClock({
       time: 0.001,
     })
-    const taskList = new TaskList([task], (item, params) => {
-      expect(item).toBe(task)
-      expect(params).toBeUndefined()
+    const taskList = new TaskList([task], (t) => {
+      expect(t).toBe(task)
     })
     const p1 = taskList.start()
 

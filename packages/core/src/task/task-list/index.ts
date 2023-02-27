@@ -5,7 +5,7 @@ import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask } f
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
-  private callback?: (task: BaseTask, params: any[]) => void
+  private callback?: (task: BaseTask) => void
   private errorCallback: (error: Error, task: BaseTask, taskList: TaskList) => Promise<void> = error => Promise.reject(error)
   private initList: BaseTask[]
 
@@ -171,8 +171,8 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     else {
       this.waitExecutableTaskQueue.forEach((task) => {
         task.start()
-          .then((...params) => {
-            this.callback && this.callback(task, ...params)
+          .then((t) => {
+            this.callback && this.callback(t)
             arrayDelete(this.taskQueue, task)
           })
           .catch(error => this.errorCallback(error, task, this))

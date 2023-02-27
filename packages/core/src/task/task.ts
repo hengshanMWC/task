@@ -54,10 +54,12 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return params
   }
 
+  // protected triggerResolve(task: this): this
+
   private execute(next: Next, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param
     if (end === true) {
-      this.triggerResolve()
+      this.triggerResolve(this)
     }
     else if (this.status === 'active') {
       this.cutter(next)
