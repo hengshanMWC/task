@@ -4,7 +4,7 @@ import { wait } from '../utils'
 /**
  * @vitest-environment jsdom
  */
-describe('test', () => {
+describe('base', () => {
   test('start', async () => {
     const handleSuccess = vi.fn()
     const taskList = new TaskList()
@@ -23,13 +23,57 @@ describe('test', () => {
     })
     const taskList = new TaskList([task])
     const p1 = taskList.start()
+    expect(taskList.activeTaskList.length).toBe(1)
     p1.then(handleSuccess)
     taskList.pause()
+    expect(taskList.activeTaskList.length).toBe(0)
+    expect(taskList.pauseTaskList.length).toBe(1)
     await wait()
     expect(handleSuccess).not.toHaveBeenCalled()
     const p2 = taskList.start()
+    expect(taskList.activeTaskList.length).toBe(1)
     await p2
+    expect(taskList.endTaskList.length).toBe(1)
     expect(handleSuccess).toHaveBeenCalled()
     expect(p1).toBe(p2)
   })
+  test('cancel', async () => {
+    const handleSuccess = vi.fn()
+    const handleSuccess2 = vi.fn()
+    const task = new AlarmClock({
+      time: 0.001,
+    })
+    const taskList = new TaskList([task])
+    const p1 = taskList.start()
+    p1.then(handleSuccess)
+    taskList.cancel()
+    await wait()
+    expect(handleSuccess).not.toHaveBeenCalled()
+    const p2 = taskList.start([task])
+    p2.then(handleSuccess2)
+    await p2
+    expect(handleSuccess).not.toHaveBeenCalled()
+    expect(handleSuccess2).toHaveBeenCalled()
+    expect(p1).not.toBe(p2)
+  })
+  test('reset', async () => {
+    const handleSuccess = vi.fn()
+    const handleSuccess2 = vi.fn()
+    const task = new AlarmClock({
+      time: 0.001,
+    })
+    const taskList = new TaskList([task])
+    const p1 = taskList.start()
+    p1.then(handleSuccess)
+    const p2 = taskList.reset([task])
+    p2.then(handleSuccess2)
+    await p2
+    expect(handleSuccess).not.toHaveBeenCalled()
+    expect(handleSuccess2).toHaveBeenCalled()
+    expect(p1).not.toBe(p2)
+  })
 })
+
+// describe('ability', () => {
+
+// })
