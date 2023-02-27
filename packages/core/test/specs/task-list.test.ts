@@ -116,5 +116,7 @@ describe('ability', () => {
     expect(taskList.executableTaskQueue.length).toBe(0)
     taskList.setMaxSync(2)
     expect(taskList.executableTaskQueue.length).toBe(1)
+    taskList.setMaxSync(0)
+    expect(taskList.executableTaskQueue.length).toBe(0)
   })
 })
