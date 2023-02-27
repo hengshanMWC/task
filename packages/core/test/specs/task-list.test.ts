@@ -33,9 +33,11 @@ describe('base', () => {
     expect(taskList.idleTaskList.length).toBe(0)
     expect(taskList.activeTaskList.length).toBe(1)
     expect(taskList.undoneTaskList.length).toBe(1)
+    expect(taskList.idle).toBeFalsy()
 
     p1.then(handleSuccess)
     taskList.pause()
+    expect(taskList.idle).toBeTruthy()
 
     expect(taskList.taskQueue.length).toBe(0)
     expect(taskList.activeTaskList.length).toBe(0)
@@ -56,6 +58,7 @@ describe('base', () => {
     expect(taskList.undoneTaskList.length).toBe(0)
     expect(taskList.endTaskList.length).toBe(1)
     expect(handleSuccess).toHaveBeenCalled()
+    expect(taskList.end).toBeTruthy()
     expect(p1).toBe(p2)
   })
   test('cancel', async () => {
@@ -97,6 +100,21 @@ describe('base', () => {
   })
 })
 
-// describe('ability', () => {
-
-// })
+describe('ability', () => {
+  test('setMaxSync', async () => {
+    const callback = vi.fn()
+    // function createAlarmClock () {
+    //   return new AlarmClock({
+    //     time: 0.001,
+    //   })
+    // }
+    const task = new AlarmClock({
+      time: 0.001,
+    })
+    const taskList = new TaskList([task], undefined, -1)
+    const p1 = taskList.start(task)
+    expect(taskList.executableTaskQueue.length).toBe(0)
+    taskList.setMaxSync(2)
+    // expect(taskList.executableTaskQueue.length).toBe(1)
+  })
+})
