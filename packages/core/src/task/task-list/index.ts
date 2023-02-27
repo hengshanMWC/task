@@ -49,14 +49,19 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this.taskQueue.slice(0, this.maxSync)
   }
 
-  // 执行中队列
+  // 等待执行队列
+  get waitTaskQueue() {
+    return this.executableTaskQueue.filter(task => task.status !== 'active')
+  }
+
+  // 等待执行队列
   get activeTaskQueue() {
     return getStatusTask(this.executableTaskQueue, 'active')
   }
 
   // 等待可执行队列
   get waitExecutableTaskQueue() {
-    return this.taskQueue.slice(this.activeTaskQueue.length)
+    return this.waitTaskQueue.slice(this.activeTaskQueue.length, this.maxSync)
   }
 
   // 未结束队列

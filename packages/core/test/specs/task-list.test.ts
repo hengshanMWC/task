@@ -115,6 +115,6 @@ describe('ability', () => {
     const p1 = taskList.start(task)
     expect(taskList.executableTaskQueue.length).toBe(0)
     taskList.setMaxSync(2)
-    // expect(taskList.executableTaskQueue.length).toBe(1)
+    expect(taskList.executableTaskQueue.length).toBe(1)
   })
 })
