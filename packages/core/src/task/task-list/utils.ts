@@ -45,10 +45,15 @@ function getNotActiveTask(list: Task[], params?: TaskListParams) {
   })
 }
 
+function nonExistent(list: Task[], item: valueType) {
+  return typeof item !== 'number' && !list.includes(item)
+}
+
 export {
   getList,
   getIndexList,
   arrayDelete,
   getStatusTask,
   getNotActiveTask,
+  nonExistent,
 }

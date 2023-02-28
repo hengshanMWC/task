@@ -103,20 +103,22 @@ describe('base', () => {
 describe('ability', () => {
   test('setMaxSync', async () => {
     const callback = vi.fn()
-    // function createAlarmClock () {
-    //   return new AlarmClock({
-    //     time: 0.001,
-    //   })
-    // }
-    const task = new AlarmClock({
-      time: 0.001,
-    })
-    const taskList = new TaskList([task], undefined, -1)
+    const tasks = createAlarmClockList(3)
+    const task = tasks[0]
+    const taskList = new TaskList(tasks, callback, -1)
     const p1 = taskList.start(task)
     expect(taskList.executableTaskQueue.length).toBe(0)
     taskList.setMaxSync(2)
     expect(taskList.executableTaskQueue.length).toBe(1)
     taskList.setMaxSync(0)
     expect(taskList.executableTaskQueue.length).toBe(0)
+    // await wait()
+    // expect(callback).toHaveBeenCalledTimes(1)
   })
 })
+
+function createAlarmClockList(num = 10) {
+  return Array(num).fill(1).map(() => new AlarmClock({
+    time: 0.001,
+  }))
+}

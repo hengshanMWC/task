@@ -1,6 +1,6 @@
 import type { Next } from '../task'
 import { Task } from '../task'
-import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask } from './utils'
+import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
@@ -48,19 +48,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this.taskQueue.slice(0, this.maxSync)
   }
 
-  // 等待执行队列
-  get waitTaskQueue() {
-    return this.executableTaskQueue.filter(task => task.status !== 'active')
-  }
-
-  // 等待执行队列
-  get activeTaskQueue() {
-    return getStatusTask(this.executableTaskQueue, 'active')
-  }
-
   // 等待可执行队列
   get waitExecutableTaskQueue() {
-    return this.waitTaskQueue.slice(this.activeTaskQueue.length, this.maxSync)
+    const list = this.executableTaskQueue
+    const index = list.findIndex(task => task.status === 'active')
+    return list.splice(Math.max(index, 0))
   }
 
   // 未结束队列
@@ -86,10 +78,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     this.maxSync = maxSync
     if (ctx) {
       if (num > 0) {
-        this.start(ctx.taskQueue.splice(oldMaxSync, num))
+        this.start(this.waitExecutableTaskQueue)
       }
       else if (num < 0) {
-        this.pause(ctx.taskQueue.splice(maxSync, Math.abs(num)))
+        const value = Math.abs(num)
+        this.pause(index === 0 ? undefined : ctx.taskQueue.splice(maxSync - value, value))
       }
     }
     return this
@@ -135,9 +128,24 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
   protected onExecute(params?: TaskListParams) {
     const ctx = this.ctx
-    if (ctx) {
-      this.addItems(params)
-      ctx.taskQueue.push(...getNotActiveTask(ctx.taskList, params))
+    if (ctx && params) {
+      const list = Array.isArray(params) ? params : [params]
+      list.forEach((item) => {
+        if (nonExistent(ctx.taskList, item)) {
+          ctx.taskList.push(item as Task)
+        }
+        if (nonExistent(ctx.taskQueue, item)) {
+          ctx.taskQueue.push(item as Task)
+        }
+      })
+    }
+    // items为undefined则是全部
+    else if (ctx && params === undefined) {
+      ctx.taskList.forEach((task) => {
+        if (!ctx.taskQueue.includes(task)) {
+          ctx.taskQueue.push(task)
+        }
+      })
     }
     return this
   }
@@ -186,18 +194,6 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     }
 
     return this
-  }
-
-  private addItems(items?: TaskListParams) {
-    const ctx = this.ctx
-    if (ctx && items) {
-      const list = Array.isArray(items) ? items : [items]
-      list.forEach((item) => {
-        if (typeof item !== 'number' && !ctx.taskList.includes(item)) {
-          ctx.taskList.push(item)
-        }
-      })
-    }
   }
 }
 
