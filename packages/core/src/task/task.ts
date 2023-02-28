@@ -4,6 +4,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   status: TaskStatus = 'idle'
   ctx: Ctx | undefined
   sign = 0
+  currentNext?: Next
 
   start(params?: T): Promise<any> {
     return this.createPromiseSingleton(this.startParams(params)).currentPromise as Promise<any>
@@ -54,6 +55,16 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return params
   }
 
+  protected cutter(next: Next) {
+    try {
+      this.cut(next)
+    }
+    catch (err) {
+      this.triggerReject(err)
+    }
+    return this
+  }
+
   // protected triggerResolve(task: this): this
 
   private execute(next: Next, param?: NextParam) {
@@ -63,16 +74,6 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     }
     else if (this.status === 'active') {
       this.cutter(next)
-    }
-    return this
-  }
-
-  private cutter(next: Next) {
-    try {
-      this.cut(next)
-    }
-    catch (err) {
-      this.triggerReject(err)
     }
     return this
   }
@@ -120,6 +121,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
       }
       return this
     }
+    this.currentNext = next
     return next
   }
 }
