@@ -1,15 +1,14 @@
-import type { BaseTask } from '../../core'
 import type { Next } from '../task'
 import { Task } from '../task'
 import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
-  private callback?: (task: BaseTask) => void
-  private errorCallback: (error: Error, task: BaseTask, taskList: TaskList) => Promise<void> = error => Promise.reject(error)
-  private initList: BaseTask[]
+  private callback?: (task: Task) => void
+  private errorCallback: (error: Error, task: Task, taskList: TaskList) => Promise<void> = error => Promise.reject(error)
+  private initList: Task[]
 
-  constructor(list: BaseTask[] = [], callback?: TaskList['callback'], maxSync = 1) {
+  constructor(list: Task[] = [], callback?: TaskList['callback'], maxSync = 1) {
     super()
     this.initList = list
     this.setMaxSync(maxSync)
@@ -118,16 +117,16 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected createCtx(params?: TaskListParams): TaskListCtx | undefined {
-    const list: BaseTask[] = [...this.initList]
+    const list: Task[] = [...this.initList]
     if (Array.isArray(params) && typeof params[0] !== 'number') {
-      list.push(...params as BaseTask[])
+      list.push(...params as Task[])
     }
     else if (params !== undefined && typeof params !== 'number') {
-      list.push(params as BaseTask)
+      list.push(params as Task)
     }
 
-    const taskList: BaseTask[] = [...new Set(list)]
-    const taskQueue: BaseTask[] = getNotActiveTask(taskList, params)
+    const taskList: Task[] = [...new Set(list)]
+    const taskQueue: Task[] = getNotActiveTask(taskList, params)
     return {
       taskList,
       taskQueue,
@@ -202,11 +201,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 }
 
-type valueType = number | BaseTask
+type valueType = number | Task
 type TaskListParams = valueType | valueType[]
 interface TaskListCtx {
-  taskList: BaseTask[]
-  taskQueue: BaseTask[]
+  taskList: Task[]
+  taskQueue: Task[]
 }
 
 export {

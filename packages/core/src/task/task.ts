@@ -124,7 +124,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 }
 type NextParam = boolean | (() => boolean)
-type Next<T = BaseTask> = (param?: NextParam) => T
+type Next<T = Task> = (param?: NextParam) => T
 type CreateCtx<Ctx = any> = Ctx | undefined
 export {
   Task,
