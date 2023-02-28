@@ -119,8 +119,9 @@ describe('ability', () => {
     expect(taskList.executableTaskQueue[0]).toBe(tasks[0])
     taskList.setMaxSync(3)
     expect(taskList.executableTaskQueue.length).toBe(2)
-    // await wait()
-    // expect(callback).toHaveBeenCalledTimes(1)
+    // taskList.start()
+    // await p
+    // expect(callback).toHaveBeenCalledTimes(3)
   })
 })
 
