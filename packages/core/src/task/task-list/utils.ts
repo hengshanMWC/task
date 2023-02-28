@@ -56,4 +56,5 @@ export {
   getStatusTask,
   getNotActiveTask,
   nonExistent,
+  getItem,
 }

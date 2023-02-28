@@ -1,6 +1,6 @@
 import type { Next } from '../task'
 import { Task } from '../task'
-import { arrayDelete, getIndexList, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
+import { arrayDelete, getIndexList, getItem, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
@@ -82,7 +82,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       }
       else if (num < 0) {
         const value = Math.abs(num)
-        const list = index === 0 ? ctx.taskQueue : ctx.taskQueue.splice(maxSync - value, value)
+        const list = index === 0 ? ctx.taskQueue : ctx.taskQueue.splice(maxSync, value)
         list.forEach(task => task.pause())
       }
     }
@@ -132,12 +132,14 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     if (ctx && params) {
       const list = Array.isArray(params) ? params : [params]
       list.forEach((item) => {
+        const task = getItem(ctx.taskList, item)
         if (nonExistent(ctx.taskList, item)) {
           ctx.taskList.push(item as Task)
         }
         if (nonExistent(ctx.taskQueue, item)) {
           ctx.taskQueue.push(item as Task)
         }
+        task.start()
       })
     }
     // items为undefined则是全部
