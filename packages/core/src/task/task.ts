@@ -110,7 +110,6 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   protected onExecute(params?: T) {
-    return this
   }
 
   private createNext() {

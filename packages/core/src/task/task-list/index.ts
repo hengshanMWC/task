@@ -128,36 +128,14 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected onExecute(params?: TaskListParams) {
-    const ctx = this.ctx
-    if (ctx) {
-      if (params !== undefined) {
-        const list = Array.isArray(params) ? params : [params]
-        list.forEach((item) => {
-          if (nonExistent(ctx.taskList, item)) {
-            ctx.taskList.push(item as Task)
-          }
-          if (nonExistent(ctx.taskQueue, item)) {
-            ctx.taskQueue.push(item as Task)
-          }
-        })
-      }
-      // items为undefined则是全部
-      else {
-        ctx.taskList.forEach((task) => {
-          if (!ctx.taskQueue.includes(task)) {
-            ctx.taskQueue.push(task)
-          }
-        })
-      }
-      if (this.currentNext) {
-        this.cutter(this.currentNext)
-      }
+    const ctx = this.addTasks(params).ctx
+    if (ctx && this.currentNext) {
+      this.cutter(this.currentNext)
     }
-    return this
   }
 
   protected onProceed(params?: TaskListParams | undefined): void {
-    this.onExecute(params)
+    this.addTasks(params)
   }
 
   protected interceptPause(params?: TaskListParams) {
@@ -198,7 +176,32 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
           .catch(error => this.triggerReject(error))
       })
     }
+    return this
+  }
 
+  private addTasks(params?: TaskListParams) {
+    const ctx = this.ctx
+    if (ctx) {
+      if (params !== undefined) {
+        const list = Array.isArray(params) ? params : [params]
+        list.forEach((item) => {
+          if (nonExistent(ctx.taskList, item)) {
+            ctx.taskList.push(item as Task)
+          }
+          if (nonExistent(ctx.taskQueue, item)) {
+            ctx.taskQueue.push(item as Task)
+          }
+        })
+      }
+      // items为undefined则是全部
+      else {
+        ctx.taskList.forEach((task) => {
+          if (!ctx.taskQueue.includes(task)) {
+            ctx.taskQueue.push(task)
+          }
+        })
+      }
+    }
     return this
   }
 }
