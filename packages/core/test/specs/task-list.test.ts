@@ -104,14 +104,16 @@ describe('ability', () => {
   test('setMaxSync', async () => {
     const callback = vi.fn()
     const tasks = createAlarmClockList(3)
-    const task = tasks[0]
     const taskList = new TaskList(tasks, callback, -1)
-    const p1 = taskList.start(task)
+    taskList.start(tasks[0])
     expect(taskList.executableTaskQueue.length).toBe(0)
     taskList.setMaxSync(2)
     expect(taskList.executableTaskQueue.length).toBe(1)
     taskList.setMaxSync(0)
     expect(taskList.executableTaskQueue.length).toBe(0)
+    taskList.start(tasks[1])
+    taskList.setMaxSync(2)
+    expect(taskList.executableTaskQueue.length).toBe(2)
     // await wait()
     // expect(callback).toHaveBeenCalledTimes(1)
   })

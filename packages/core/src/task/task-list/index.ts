@@ -60,7 +60,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this.taskList.filter(task => task.status !== 'end')
   }
 
-  // 队列空闲
+  // 空闲
   get idle() {
     return this.taskQueue.length === 0
   }
@@ -82,7 +82,8 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       }
       else if (num < 0) {
         const value = Math.abs(num)
-        this.pause(index === 0 ? undefined : ctx.taskQueue.splice(maxSync - value, value))
+        const list = index === 0 ? ctx.taskQueue : ctx.taskQueue.splice(maxSync - value, value)
+        list.forEach(task => task.pause())
       }
     }
     return this
