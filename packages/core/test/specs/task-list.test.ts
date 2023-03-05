@@ -150,6 +150,20 @@ describe('ability', () => {
   })
 })
 
+describe('on', () => {
+  test('onParams', () => {
+    const tasks = createAlarmClockList()
+    const taskList = new TaskList(tasks)
+    taskList.onParams((task, _taskList) => {
+      expect(task).toBe(tasks[0])
+      expect(taskList).toBe(_taskList)
+      return 1
+    })
+    taskList.start()
+    expect(taskList.taskQueue[0].task.ctx).toBe(1)
+  })
+})
+
 function createAlarmClockList(num = 1) {
   return Array(num).fill(1).map((item, index) => new TestTask())
 }
