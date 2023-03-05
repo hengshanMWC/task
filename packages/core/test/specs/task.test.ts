@@ -18,7 +18,7 @@ describe('test', () => {
     task.pause()
     await wait()
     expect(task.status).toBe('pause')
-    expect(TestTask.value - 1).toBe(task.ctx)
+    expect(TestTask.value).toBe(task.ctx)
     const p3 = task.start()
     // 测试重新启动
     expect(p).toBe(p3)
