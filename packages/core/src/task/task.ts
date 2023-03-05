@@ -12,6 +12,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
 
   pause(params?: T) {
     if (this.status === 'active' && this.interceptPause(params) !== false) {
+      this.renew()
       this.status = 'pause'
     }
     return this
@@ -114,7 +115,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   private createNext() {
-    const sign = ++this.sign
+    const sign = this.renew()
     const next: Next = (param) => {
       if (sign === this.sign) {
         this.execute(next, param)
@@ -123,6 +124,10 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     }
     this.currentNext = next
     return next
+  }
+
+  private renew() {
+    return ++this.sign
   }
 }
 type NextParam = boolean | (() => boolean)
