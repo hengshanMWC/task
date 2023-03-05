@@ -1,12 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
-import { Task } from '../../src/index'
-import { wait } from '../utils'
+import { TestTask, wait } from '../utils'
 
 describe('test', () => {
   test('start->pause->start', async () => {
     const task = new TestTask()
     expect(task.status).toBe('idle')
-    const p = task.start(value)
+    const p = task.start(TestTask.value)
     p.then((t) => {
       expect(t).toBe(task)
       expect(task.status).toBe('end')
@@ -19,7 +18,7 @@ describe('test', () => {
     task.pause()
     await wait()
     expect(task.status).toBe('pause')
-    expect(value - 1).toBe(task.ctx)
+    expect(TestTask.value - 1).toBe(task.ctx)
     const p3 = task.start()
     // 测试重新启动
     expect(p).toBe(p3)
@@ -27,23 +26,23 @@ describe('test', () => {
   })
   test('cancel', () => {
     const task = new TestTask()
-    task.start(value)
+    task.start(TestTask.value)
     task.cancel()
     expect(task.status).toBe('end')
   })
   test('reset', async () => {
     const task = new TestTask()
-    const p = task.start(value)
-    const p2 = task.reset(value)
+    const p = task.start(TestTask.value)
+    const p2 = task.reset(TestTask.value)
     expect(p).not.toBe(p2)
     await Promise.resolve()
-    expect(value - 1).toBe(task.ctx)
+    expect(TestTask.value - 1).toBe(task.ctx)
   })
   test('error', async () => {
     const task = new TestTask()
     const fn = vi.fn()
     try {
-      await task.start(value + 1)
+      await task.start(TestTask.errorValue)
     }
     catch {
       fn()
@@ -51,26 +50,3 @@ describe('test', () => {
     expect(fn).toHaveBeenCalled()
   })
 })
-const value = 2
-
-class TestTask extends Task<number> {
-  cut(next) {
-    if (this.ctx === value + 1) {
-      throw new Error('test')
-    }
-    else {
-      Promise.resolve()
-        .then(() => {
-          next(() => {
-            if (this.ctx) {
-              this.ctx--
-            }
-            else {
-              return true
-            }
-          })
-        })
-    }
-    return this
-  }
-}
