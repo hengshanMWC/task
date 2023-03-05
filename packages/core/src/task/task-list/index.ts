@@ -1,6 +1,6 @@
 import type { Next } from '../task'
 import { Task } from '../task'
-import { arrayDelete, createItem, getIndexList, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
+import { arrayDelete, createItem, getIndex, getIndexList, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
@@ -85,14 +85,18 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     if (!this.ctx)
       return
     // 获取源的index
-    const originIndex = getIndexList(this.taskList, originValue)[0]
+    const list = this.taskList
+    const originIndex = getIndex(list, originValue)
+    let targetIndex = getIndex(list, targetValue || 0)
     // 判断是正常的index
-    if (!isNaN(originIndex)) {
-      const originTask = this.taskList.splice(originIndex, 1)[0]
-      const targetIndex = getIndexList(this.taskList, targetValue || 0)[0]
-      if (!isNaN(targetIndex)) {
-        this.taskList.splice(targetIndex, 0, originTask)
-      }
+    if (
+      originIndex !== -1
+      && targetIndex !== -1
+      && originIndex < list.length
+      && targetIndex < list.length) {
+      const originTask = list.splice(originIndex, 1)[0]
+      targetIndex = getIndex(list, targetValue || 0)
+      list.splice(targetIndex, 0, originTask)
     }
     return this
   }
