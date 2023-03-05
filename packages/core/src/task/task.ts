@@ -11,7 +11,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   pause(params?: T) {
-    if (this.interceptPause(params) !== false) {
+    if (this.status === 'active' && this.interceptPause(params) !== false) {
       this.status = 'pause'
     }
     return this
@@ -92,9 +92,10 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
         this.currentResolve = resolve
         this.currentReject = reject
         this.run(params).cutter(next)
-      }).finally(() => {
-        this.status = 'end'
       })
+        .finally(() => {
+          this.status = 'end'
+        })
     }
     else {
       this.onExecute(params)
