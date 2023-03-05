@@ -130,27 +130,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   }
 
   protected interceptPause(params?: TaskListParams) {
-    const ctx = this.ctx
-    if (ctx) {
-      const list = getList(ctx.taskList, params)
-      list.forEach((task) => {
-        task.pause()
-      })
-      arrayDelete(ctx.taskQueue, list)
-    }
-    return this.idle
+    return this.handleIntercept((task: Task) => task.pause(), params)
   }
 
   protected interceptCancel(params?: TaskListParams) {
-    const ctx = this.ctx
-    if (ctx) {
-      const list = getList(ctx.taskList, params)
-      list.forEach((task) => {
-        task.cancel()
-      })
-      arrayDelete(ctx.taskQueue, list)
-    }
-    return this.idle
+    return this.handleIntercept((task: Task) => task.cancel(), params)
   }
 
   protected cut(next: Next) {
@@ -228,6 +212,16 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       }
     }
     return this
+  }
+
+  private handleIntercept(callback: (task: Task) => void, params?: TaskListParams) {
+    const ctx = this.ctx
+    if (ctx) {
+      const list = getList(ctx.taskList, params)
+      list.forEach(task => callback(task))
+      arrayDelete(ctx.taskQueue, list)
+    }
+    return this.idle
   }
 }
 
