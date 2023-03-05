@@ -1,6 +1,6 @@
 import type { Next } from '../task'
 import { Task } from '../task'
-import { arrayDelete, createItem, getIndex, getIndexList, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
+import { arrayDelete, createItem, getIndex, getList, getNotActiveTask, nonExistent } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
