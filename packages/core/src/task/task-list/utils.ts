@@ -23,7 +23,7 @@ function getIndexList(list: Task[], value?: TaskListParams): number[] {
     return list.map((task, index) => index)
   }
   const arr = Array.isArray(value) ? value : [value]
-  return arr.map(value => this.getIndex(list, value))
+  return arr.map(value => getIndex(list, value))
 }
 
 function arrayDelete(list: QueueItem[], tasks: Task[]) {
@@ -60,6 +60,7 @@ function createItem(task: Task): QueueItem {
 
 export {
   getList,
+  getIndex,
   getIndexList,
   arrayDelete,
   getStatusTask,
