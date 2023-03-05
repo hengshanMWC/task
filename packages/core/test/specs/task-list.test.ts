@@ -26,12 +26,10 @@ describe('base', () => {
     })
     const p1 = taskList.start()
 
-    expect(taskList.taskQueue[0]).toBe(task)
+    expect(taskList.taskQueue[0].task).toBe(task)
     expect(taskList.taskList[0]).toBe(task)
     expect(taskList.taskList.length).toBe(1)
     expect(taskList.taskQueue.length).toBe(1)
-    expect(taskList.idleTaskList.length).toBe(0)
-    expect(taskList.activeTaskList.length).toBe(1)
     expect(taskList.undoneTaskList.length).toBe(1)
     expect(taskList.idle).toBeFalsy()
 
@@ -40,8 +38,6 @@ describe('base', () => {
     expect(taskList.idle).toBeTruthy()
 
     expect(taskList.taskQueue.length).toBe(0)
-    expect(taskList.activeTaskList.length).toBe(0)
-    expect(taskList.pauseTaskList.length).toBe(1)
 
     await wait()
 
@@ -50,7 +46,6 @@ describe('base', () => {
     const p2 = taskList.start()
 
     expect(taskList.taskQueue.length).toBe(1)
-    expect(taskList.activeTaskList.length).toBe(1)
 
     await p2
 
@@ -103,7 +98,7 @@ describe('base', () => {
 describe('ability', () => {
   test('setMaxSync', async () => {
     const callback = vi.fn()
-    const tasks = createAlarmClockList(5)
+    const tasks = createAlarmClockList()
     const taskList = new TaskList(tasks, callback, -1)
     const p = taskList.start(tasks[0])
     expect(taskList.executableTaskQueue.length).toBe(0)
@@ -116,17 +111,17 @@ describe('ability', () => {
     expect(taskList.executableTaskQueue.length).toBe(2)
     taskList.setMaxSync(1)
     expect(taskList.executableTaskQueue.length).toBe(1)
-    expect(taskList.executableTaskQueue[0]).toBe(tasks[0])
+    expect(taskList.executableTaskQueue[0].task).toBe(tasks[0])
     taskList.setMaxSync(3)
     expect(taskList.executableTaskQueue.length).toBe(2)
-    // taskList.start()
-    // await p
-    // expect(callback).toHaveBeenCalledTimes(3)
+    taskList.start()
+    await p
+    expect(callback).toHaveBeenCalledTimes(5)
   })
 })
 
-function createAlarmClockList(num = 10) {
-  return Array(num).fill(1).map(index => new AlarmClock({
+function createAlarmClockList(num = 5) {
+  return Array(num).fill(1).map((item, index) => new AlarmClock({
     time: 0.001 + index / 1000,
   }))
 }

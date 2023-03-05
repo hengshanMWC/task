@@ -1,11 +1,11 @@
 import type { Next } from '../task'
 import { Task } from '../task'
-import { arrayDelete, getIndexList, getItem, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
+import { arrayDelete, createItem, getIndexList, getList, getNotActiveTask, getStatusTask, nonExistent } from './utils'
 
 class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
   private callback?: (task: Task) => void
-  private errorCallback: (error: Error, task: Task, taskList: TaskList) => Promise<void> = error => Promise.reject(error)
+  private errorCallback: (error: Error, task: Task, taskList: TaskList) => void = (error) => { throw error }
   private initList: Task[]
 
   constructor(list: Task[] = [], callback?: TaskList['callback'], maxSync = 1) {
@@ -23,24 +23,13 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     return this.ctx?.taskQueue || []
   }
 
-  // 执行中列表
-  get activeTaskList() {
-    return getStatusTask(this.taskList, 'active')
-  }
-
-  // 空闲列表
-  get idleTaskList() {
-    return getStatusTask(this.taskList, 'idle')
-  }
-
-  // 暂停列表
-  get pauseTaskList() {
-    return getStatusTask(this.taskList, 'pause')
+  get carryTaskQueue() {
+    return this.taskQueue.map(({ task }) => task)
   }
 
   // 结束列表
   get endTaskList() {
-    return getStatusTask(this.taskList, 'end')
+    return this.taskList.filter(item => item.status === 'end')
   }
 
   // 执行队列
@@ -50,9 +39,12 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
   // 等待可执行队列
   get waitExecutableTaskQueue() {
-    const list = this.executableTaskQueue
-    const index = list.findIndex(task => task.status === 'active')
-    return list.slice(Math.max(index, 0))
+    return this.executableTaskQueue.filter(item => item.task.status !== 'active')
+  }
+
+  // 执行完成队列
+  get endTaskQueue() {
+    return this.executableTaskQueue.filter(item => item.task.status === 'end')
   }
 
   // 未结束队列
@@ -78,12 +70,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     this.maxSync = maxSync
     if (ctx) {
       if (num > 0) {
-        this.start(this.waitExecutableTaskQueue)
+        this.start(this.waitExecutableTaskQueue.map(item => item.task))
       }
       else if (num < 0) {
-        const value = Math.abs(num)
-        const list = index === 0 ? ctx.taskQueue : ctx.taskQueue.slice(maxSync, value)
-        list.forEach(task => task.pause())
+        const list = index === 0 ? ctx.taskQueue : ctx.taskQueue.slice(oldMaxSync, maxSync)
+        list.forEach(item => item.task.pause())
       }
     }
     return this
@@ -120,10 +111,10 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     }
 
     const taskList: Task[] = [...new Set(list)]
-    const taskQueue: Task[] = getNotActiveTask(taskList, params)
+    const carryTaskQueue: Task[] = getNotActiveTask(taskList, params)
     return {
       taskList,
-      taskQueue,
+      taskQueue: carryTaskQueue.map(task => createItem(task)),
     }
   }
 
@@ -141,10 +132,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   protected interceptPause(params?: TaskListParams) {
     const ctx = this.ctx
     if (ctx) {
-      getList(ctx.taskList, params).forEach((task) => {
+      const list = getList(ctx.taskList, params)
+      list.forEach((task) => {
         task.pause()
-        arrayDelete(ctx.taskQueue, task)
       })
+      arrayDelete(ctx.taskQueue, list)
     }
     return this.idle
   }
@@ -152,10 +144,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   protected interceptCancel(params?: TaskListParams) {
     const ctx = this.ctx
     if (ctx) {
-      getList(ctx.taskList, params).forEach((task) => {
+      const list = getList(ctx.taskList, params)
+      list.forEach((task) => {
         task.cancel()
-        arrayDelete(ctx.taskQueue, task)
       })
+      arrayDelete(ctx.taskQueue, list)
     }
     return this.idle
   }
@@ -165,18 +158,50 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       next(true)
     }
     else {
-      this.waitExecutableTaskQueue.forEach((task) => {
-        task.start()
-          .then((t) => {
-            this.callback && this.callback(t)
-            arrayDelete(this.taskQueue, task)
-          })
-          .catch(error => this.errorCallback(error, task, this))
-          .then(() => next(this.end))
-          .catch(error => this.triggerReject(error))
+      this.waitExecutableTaskQueue.forEach((item) => {
+        const p = item.task.start()
+        this.cutNext(next, item, p)
       })
     }
     return this
+  }
+
+  private async cutNext(next: Next, item: QueueItem, p: Promise<Task>) {
+    const task = item.task
+    const isClean = !item.promise
+    item.promise = p
+    try {
+      const t = await p
+      if (isClean) {
+        next(() => {
+          try {
+            this.callback && this.callback(t)
+            arrayDelete(this.taskQueue, this.endTaskQueue.map(item => item.task))
+          }
+          catch (error) {
+            this.handleError(error, task)
+          }
+          return this.end
+        })
+      }
+    }
+    catch (error) {
+      if (isClean) {
+        next(() => {
+          this.handleError(error, task)
+          return this.end
+        })
+      }
+    }
+  }
+
+  private handleError(error: Error, task: Task) {
+    try {
+      this.errorCallback(error, task, this)
+    }
+    catch (err) {
+      this.triggerReject(error)
+    }
   }
 
   private addTasks(params?: TaskListParams) {
@@ -188,16 +213,16 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
           if (nonExistent(ctx.taskList, item)) {
             ctx.taskList.push(item as Task)
           }
-          if (nonExistent(ctx.taskQueue, item)) {
-            ctx.taskQueue.push(item as Task)
+          if (nonExistent(this.carryTaskQueue, item)) {
+            ctx.taskQueue.push(createItem(item as Task))
           }
         })
       }
       // items为undefined则是全部
       else {
         ctx.taskList.forEach((task) => {
-          if (!ctx.taskQueue.includes(task)) {
-            ctx.taskQueue.push(task)
+          if (!this.carryTaskQueue.includes(task)) {
+            ctx.taskQueue.push(createItem(task))
           }
         })
       }
@@ -208,13 +233,18 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
 type valueType = number | Task
 type TaskListParams = valueType | valueType[]
+interface QueueItem {
+  task: Task
+  promise: Promise<Task> | null
+}
 interface TaskListCtx {
   taskList: Task[]
-  taskQueue: Task[]
+  taskQueue: QueueItem[]
 }
 
 export {
   TaskList,
   valueType,
   TaskListParams,
+  QueueItem,
 }

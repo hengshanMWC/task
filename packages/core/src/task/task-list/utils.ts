@@ -1,6 +1,6 @@
 import type { TaskStatus } from '../../core'
 import type { Task } from '../task'
-import type { TaskListParams, valueType } from './index'
+import type { QueueItem, TaskListParams, valueType } from './index'
 
 function getItem(list: Task[], value: valueType) {
   return typeof value === 'number' ? list[value] : value
@@ -26,11 +26,13 @@ function getIndexList(list: Task[], value?: TaskListParams): number[] {
   return arr.map(value => this.getIndex(list, value))
 }
 
-function arrayDelete(list: Task[], task: Task) {
-  const index = getIndex(list, task)
-  if (index !== -1) {
-    list.splice(index, 1)
-  }
+function arrayDelete(list: QueueItem[], tasks: Task[]) {
+  tasks.forEach((task) => {
+    const index = getIndex(list.map(item => item.task), task)
+    if (index !== -1) {
+      list.splice(index, 1)
+    }
+  })
 }
 
 function getStatusTask(list: Task[], status: TaskStatus,
@@ -49,6 +51,13 @@ function nonExistent(list: Task[], item: valueType) {
   return typeof item !== 'number' && !list.includes(item)
 }
 
+function createItem(task: Task): QueueItem {
+  return {
+    task,
+    promise: null,
+  }
+}
+
 export {
   getList,
   getIndexList,
@@ -57,4 +66,5 @@ export {
   getNotActiveTask,
   nonExistent,
   getItem,
+  createItem,
 }
