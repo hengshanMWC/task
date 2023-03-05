@@ -6,6 +6,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
   private maxSync: number
   private callback?: (task: Task) => void
   private errorCallback: (error: Error, task: Task, taskList: TaskList) => void = (error) => { throw error }
+  private paramsCallback: (task: Task, taskList: TaskList) => void = () => undefined
   private initList: Task[]
 
   constructor(list: Task[] = [], callback?: TaskList['callback'], maxSync = 1) {
@@ -105,6 +106,10 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     this.errorCallback = errorCallback
   }
 
+  onParams(paramsCallback: TaskList['paramsCallback']) {
+    this.paramsCallback = paramsCallback
+  }
+
   protected createCtx(params?: TaskListParams): TaskListCtx | undefined {
     const list: Task[] = [...this.initList]
     if (Array.isArray(params) && typeof params[0] !== 'number') {
@@ -147,7 +152,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     }
     else {
       this.waitExecutableTaskQueue.forEach((item) => {
-        const p = item.task.start()
+        const p = item.task.start(this.paramsCallback(item.task, this))
         this.cutNext(next, item, p)
       })
     }
