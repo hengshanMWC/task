@@ -109,6 +109,45 @@ describe('ability', () => {
     await p
     expect(callback).toHaveBeenCalledTimes(5)
   })
+  test('move', async () => {
+    const tasks = createAlarmClockList(3)
+    const task = createAlarmClockList()[0]
+    const taskList = new TaskList(tasks)
+    taskList.start()
+    expect(taskList.taskList[0]).toBe(tasks[0])
+    expect(taskList.taskList[1]).toBe(tasks[1])
+    expect(taskList.taskList[2]).toBe(tasks[2])
+
+    taskList.move(0, 1)
+    expect(taskList.taskList[0]).toBe(tasks[1])
+    expect(taskList.taskList[1]).toBe(tasks[0])
+    expect(taskList.taskList[2]).toBe(tasks[2])
+
+    function regular() {
+      expect(taskList.taskList[0]).toBe(tasks[1])
+      expect(taskList.taskList[1]).toBe(tasks[2])
+      expect(taskList.taskList[2]).toBe(tasks[0])
+    }
+
+    taskList.move(tasks[2], tasks[0])
+    regular()
+
+    // 无效
+    taskList.move(tasks[2], task)
+    regular()
+
+    // 无效
+    taskList.move(task, tasks[2])
+    regular()
+
+    // 无效
+    taskList.move(1, 3)
+    regular()
+
+    // 无效
+    taskList.move(3, 1)
+    regular()
+  })
 })
 
 function createAlarmClockList(num = 1) {
