@@ -1,9 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
-import { AlarmClock, TaskList } from '../../src'
-import { wait } from '../utils'
-/**
- * @vitest-environment jsdom
- */
+import { TaskList } from '../../src'
+import { TestTask, wait } from '../utils'
 describe('base', () => {
   test('start', async () => {
     const handleSuccess = vi.fn()
@@ -18,9 +15,7 @@ describe('base', () => {
   })
   test('pause', async () => {
     const handleSuccess = vi.fn()
-    const task = new AlarmClock({
-      time: 0.001,
-    })
+    const task = createAlarmClockList()[0]
     const taskList = new TaskList([task], (t) => {
       expect(t).toBe(task)
     })
@@ -59,9 +54,7 @@ describe('base', () => {
   test('cancel', async () => {
     const handleSuccess = vi.fn()
     const handleSuccess2 = vi.fn()
-    const task = new AlarmClock({
-      time: 0.001,
-    })
+    const task = createAlarmClockList()[0]
     const taskList = new TaskList([task])
     const p1 = taskList.start()
     p1.then(handleSuccess)
@@ -80,9 +73,7 @@ describe('base', () => {
   test('reset', async () => {
     const handleSuccess = vi.fn()
     const handleSuccess2 = vi.fn()
-    const task = new AlarmClock({
-      time: 0.001,
-    })
+    const task = createAlarmClockList()[0]
     const taskList = new TaskList([task])
     const p1 = taskList.start()
     p1.then(handleSuccess)
@@ -98,7 +89,7 @@ describe('base', () => {
 describe('ability', () => {
   test('setMaxSync', async () => {
     const callback = vi.fn()
-    const tasks = createAlarmClockList()
+    const tasks = createAlarmClockList(5)
     const taskList = new TaskList(tasks, callback, -1)
     const p = taskList.start(tasks[0])
     expect(taskList.executableTaskQueue.length).toBe(0)
@@ -120,8 +111,6 @@ describe('ability', () => {
   })
 })
 
-function createAlarmClockList(num = 5) {
-  return Array(num).fill(1).map((item, index) => new AlarmClock({
-    time: 0.001 + index / 1000,
-  }))
+function createAlarmClockList(num = 1) {
+  return Array(num).fill(1).map((item, index) => new TestTask())
 }
