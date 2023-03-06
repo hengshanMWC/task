@@ -1,16 +1,15 @@
 import { describe, expect, test, vi } from 'vitest'
+import type { Task } from '../../src'
 import { TaskList } from '../../src'
 import { TestTask, wait } from '../utils'
 describe('base', () => {
   test('start', async () => {
     const handleSuccess = vi.fn()
     const taskList = new TaskList()
-    try {
-      await taskList.start()
-      handleSuccess()
-    }
-    catch {
-    }
+    const task = createAlarmClockList()[0]
+    taskList.start()
+    await taskList.start(task)
+    handleSuccess()
     expect(handleSuccess).toHaveBeenCalled()
   })
   test('pause', async () => {
@@ -161,6 +160,40 @@ describe('on', () => {
     })
     taskList.start()
     expect(taskList.taskQueue[0].task.ctx).toBe(1)
+  })
+  test('onError', async () => {
+    let error: Error
+    const catchCallback = vi.fn()
+    const errorCallback = vi.fn((err: Error, task: Task, _taskList: TaskList) => {
+      expect(err.message).toBe(error.message)
+      expect(task).toBe(tasks[0])
+      expect(taskList).toBe(_taskList)
+    })
+    const tasks = createAlarmClockList()
+    const taskList = new TaskList(tasks)
+    taskList.onParams(() => {
+      return TestTask.errorValue
+    })
+    const p = taskList.start()
+    try {
+      await p
+    }
+    catch (err) {
+      error = err
+      catchCallback()
+    }
+    expect(catchCallback).toHaveBeenCalledTimes(1)
+    taskList.onError(errorCallback)
+
+    const p2 = taskList.start()
+    try {
+      await p2
+    }
+    catch {
+      catchCallback()
+    }
+    expect(catchCallback).toHaveBeenCalledTimes(1)
+    expect(errorCallback).toHaveBeenCalledTimes(1)
   })
 })
 
