@@ -14,6 +14,32 @@ export default defineConfig({
             text: '简介',
             link: '/',
           },
+          {
+            text: '使用',
+            link: '/use',
+          },
+        ],
+      },
+      {
+        text: '功能',
+        collapsible: true,
+        items: [
+          {
+            text: 'Task',
+            link: '/task/task',
+          },
+          {
+            text: 'TaskList',
+            link: '/task/task-list',
+          },
+          {
+            text: 'FileRead',
+            link: '/task/file-read',
+          },
+          {
+            text: 'AlarmClock',
+            link: '/task/alarm-clock',
+          },
         ],
       },
     ],
