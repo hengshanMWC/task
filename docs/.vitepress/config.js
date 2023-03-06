@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitepress'
 export default defineConfig({
-  title: 'task',
-  description: 'task',
+  title: 'Task',
+  description: '用 Task 构建世界',
   base: '/',
   themeConfig: {
-    siteTitle: 'task',
+    siteTitle: 'Task',
     sidebar: [
       {
         text: '指南',
