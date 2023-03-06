@@ -4,6 +4,9 @@
 例如吃饭🍚，通过 __start__ 开始吃米饭，__pause__ 放下碗筷，__cancel__ 倒掉米饭，__reset__ 再吃一顿
 
 [@abmao/task](https://www.npmjs.com/package/@abmao/task)提供核心 __Task__ 抽象，并基于此实现了部分任务功能
+
+[文档](https://hengshanmwc.github.io/task/docs/.vitepress/dist/index.html)
+
 ## 引用
 ```
 npm install @abmao/task
