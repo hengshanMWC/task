@@ -60,7 +60,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
 
   // 结束
   get end() {
-    return this.taskList.length === this.endTaskList.length
+    return this.taskList.length === this.endTaskList.length && this.idle
   }
 
   setMaxSync(index: number) {
@@ -169,7 +169,7 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
         next(() => {
           try {
             this.callback && this.callback(t)
-            arrayDelete(this.taskQueue, this.endTaskQueue.map(item => item.task))
+            this.queueClean()
           }
           catch (error) {
             this.handleError(error, task)
@@ -194,6 +194,9 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     }
     catch (err) {
       this.triggerReject(error)
+    }
+    finally {
+      this.queueClean()
     }
   }
 
@@ -231,6 +234,11 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
       arrayDelete(ctx.taskQueue, list)
     }
     return this.idle
+  }
+
+  private queueClean() {
+    arrayDelete(this.taskQueue, this.endTaskQueue.map(item => item.task))
+    return this
   }
 }
 
