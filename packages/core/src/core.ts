@@ -1,38 +1,31 @@
-type CurrentResolve = (data: any) => void
+type CurrentResolve<T = any> = (data: T) => void
 type CurrentReject = (err: any) => void
 type TaskStatus = 'idle' | 'active' | 'pause' | 'end'
+
 interface BaseTask<T = any> {
   readonly status: TaskStatus
-  start: (params?: T) => Promise<any>
+  start: (params?: T) => Promise<this>
   pause: (params?: T) => this
   cancel: (params?: T) => this
-  reset: (params?: T) => Promise<any>
+  reset: (params?: T) => Promise<this>
 }
-class CurrentPromise {
-  protected currentPromise?: Promise<any>
-  protected currentResolve?: CurrentResolve | undefined
+
+class CurrentPromise<T = any> {
+  protected currentPromise?: Promise<T>
+  protected currentResolve?: CurrentResolve<this> | undefined
   protected currentReject?: CurrentReject | undefined
+
   protected triggerReject(err: Error) {
-    if (typeof this.currentReject === 'function') {
-      this.currentReject(err)
-      this.currentReject = undefined
-    }
+    this.currentReject?.(err)
+    this.currentReject = undefined
     return this
   }
 
-  protected triggerResolve(value?: any) {
-    if (typeof this.currentResolve === 'function') {
-      this.currentResolve(value)
-      this.currentResolve = undefined
-    }
+  protected triggerResolve(value: this) {
+    this.currentResolve?.(value)
+    this.currentResolve = undefined
     return this
   }
 }
 
-export {
-  CurrentResolve,
-  CurrentReject,
-  TaskStatus,
-  BaseTask,
-  CurrentPromise,
-}
+export { CurrentResolve, CurrentReject, TaskStatus, BaseTask, CurrentPromise }
