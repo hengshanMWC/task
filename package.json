@@ -23,7 +23,7 @@
     "test:cov": "lerna run test:cov",
     "lint": "eslint --ext=js,ts,json,md,tsx .",
     "lint:fix": "eslint --fix --ext=js,ts,json,md,tsx .",
-    "docs:dev": "vitepress dev docs",
+    "docs": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs"
   },

@@ -105,10 +105,10 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   }
 
   protected abstract cut(next: Next): this
-  protected interceptPause(params?: T): any {
+  protected interceptPause(params?: T): boolean | void {
   }
 
-  protected interceptCancel(params?: T): any {
+  protected interceptCancel(params?: T): boolean | void {
   }
 
   protected onExecute(params?: T) {
