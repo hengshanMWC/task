@@ -7,7 +7,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   currentNext?: Next
 
   start(params?: T): Promise<any> {
-    return this.createPromiseSingleton(this.interceptStartPause(params)).currentPromise as Promise<any>
+    return this.createPromiseSingleton(this.interceptStartParams(params)).currentPromise as Promise<any>
   }
 
   pause(params?: T) {
@@ -51,7 +51,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
 
   protected onExecute(params?: T) {}
 
-  protected interceptStartPause(params?: T) {
+  protected interceptStartParams(params?: T) {
     return params
   }
 

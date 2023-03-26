@@ -16,7 +16,7 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
     }
   }
 
-  protected interceptStartPause(params?: AlarmClockParams) {
+  protected interceptStartParams(params?: AlarmClockParams) {
     if (this.params !== undefined || params !== undefined) {
       return {
         ...this.params,
