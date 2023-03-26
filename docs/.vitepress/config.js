@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Task',
   description: '用 Task 构建世界',
-  base: '/task/',
+  base: '/task/dist/',
   outDir: 'dist',
   themeConfig: {
     siteTitle: 'Task',
