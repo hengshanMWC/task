@@ -10,6 +10,9 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return this._ctx
   }
 
+  set ctx(ctx) {
+  }
+
   start(params?: T): Promise<any> {
     return this.createPromiseSingleton(this.interceptStartParams(params)).currentPromise as Promise<any>
   }
