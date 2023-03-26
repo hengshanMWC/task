@@ -85,7 +85,7 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
     }
   }
 
-  protected startParams(params?: FileReadParams) {
+  protected interceptStartPause(params?: FileReadParams) {
     if (this.params !== undefined || params !== undefined) {
       return {
         ...this.params,

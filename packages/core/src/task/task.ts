@@ -3,11 +3,11 @@ import { CurrentPromise } from '../core'
 abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask<T> {
   status: TaskStatus = 'idle'
   ctx: Ctx | undefined
-  sign = 0
+  private sign = 0
   currentNext?: Next
 
   start(params?: T): Promise<any> {
-    return this.createPromiseSingleton(this.startParams(params)).currentPromise as Promise<any>
+    return this.createPromiseSingleton(this.interceptStartPause(params)).currentPromise as Promise<any>
   }
 
   pause(params?: T) {
@@ -31,30 +31,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return this.cancel().start(params)
   }
 
-  clear() {
-    this.currentPromise = undefined
-    this.currentReject = undefined
-    this.currentResolve = undefined
-    return this
-  }
-
-  protected run(params?: T) {
-    const ctx = this.createCtx(params)
-    if (this.status === 'end' || ctx !== undefined) {
-      this.ctx = ctx
-    }
-    return this
-  }
-
-  protected createCtx(params?: T): CreateCtx<Ctx> {
-    return params as CreateCtx<Ctx>
-  }
-
-  protected onProceed(params?: T) {}
-
-  protected startParams(params?: T) {
-    return params
-  }
+  protected abstract cut(next: Next): this
 
   protected cutter(next: Next) {
     try {
@@ -66,7 +43,38 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
     return this
   }
 
-  // protected triggerResolve(task: this): this
+  protected createCtx(params?: T): CreateCtx<Ctx> {
+    return params as CreateCtx<Ctx>
+  }
+
+  protected onProceed(params?: T) {}
+
+  protected onExecute(params?: T) {}
+
+  protected interceptStartPause(params?: T) {
+    return params
+  }
+
+  protected interceptPause(params?: T): boolean | void {
+  }
+
+  protected interceptCancel(params?: T): boolean | void {
+  }
+
+  private clear() {
+    this.currentPromise = undefined
+    this.currentReject = undefined
+    this.currentResolve = undefined
+    return this
+  }
+
+  private run(params?: T) {
+    const ctx = this.createCtx(params)
+    if (this.status === 'end' || ctx !== undefined) {
+      this.ctx = ctx
+    }
+    return this
+  }
 
   private execute(next: Next, param?: NextParam) {
     const end = typeof param === 'function' ? param() : param
@@ -102,16 +110,6 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
       this.onExecute(params)
     }
     return this
-  }
-
-  protected abstract cut(next: Next): this
-  protected interceptPause(params?: T): boolean | void {
-  }
-
-  protected interceptCancel(params?: T): boolean | void {
-  }
-
-  protected onExecute(params?: T) {
   }
 
   private createNext() {
