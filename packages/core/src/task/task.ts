@@ -2,9 +2,13 @@ import type { BaseTask, TaskStatus } from '../core'
 import { CurrentPromise } from '../core'
 abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask<T> {
   status: TaskStatus = 'idle'
-  ctx: Ctx | undefined
+  protected _ctx: Ctx | undefined
   private sign = 0
   currentNext?: Next
+
+  get ctx() {
+    return this._ctx
+  }
 
   start(params?: T): Promise<any> {
     return this.createPromiseSingleton(this.interceptStartParams(params)).currentPromise as Promise<any>
@@ -21,7 +25,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   cancel(params?: T) {
     if (this.interceptCancel(params) !== false) {
       this.status = 'end'
-      this.ctx = undefined
+      this._ctx = undefined
       this.clear()
     }
     return this
@@ -71,7 +75,7 @@ abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask
   private run(params?: T) {
     const ctx = this.createCtx(params)
     if (this.status === 'end' || ctx !== undefined) {
-      this.ctx = ctx
+      this._ctx = ctx
     }
     return this
   }

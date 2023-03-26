@@ -27,8 +27,8 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
 
   protected cut(next) {
     this.timer = this.timing(() => {
-      if (this.ctx) {
-        this.dealWith(next, this.ctx)
+      if (this._ctx) {
+        this.dealWith(next, this._ctx)
       }
     })
     return this
@@ -43,16 +43,16 @@ class AlarmClock extends Task<AlarmClockParams, AlarmClockCtx> {
   }
 
   protected createCtx(params?: AlarmClockParams) {
-    if (!this.ctx) {
+    if (!this._ctx) {
       return this.createContext(params)
     }
   }
 
   protected onProceed() {
-    if (this.ctx) {
-      const gap = Date.now() - this.ctx.currentTime
-      this.ctx.currentTime += gap
-      this.ctx.endTime += gap
+    if (this._ctx) {
+      const gap = Date.now() - this._ctx.currentTime
+      this._ctx.currentTime += gap
+      this._ctx.endTime += gap
     }
   }
 

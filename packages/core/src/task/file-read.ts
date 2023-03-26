@@ -19,9 +19,9 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
   }
 
   get readProgress() {
-    if (this.ctx) {
+    if (this._ctx) {
       const currentProgress = this.bytesPerChunk * this.fileChunk
-      return Math.min(currentProgress / this.ctx.file.size, 1)
+      return Math.min(currentProgress / this._ctx.file.size, 1)
     }
     else {
       return 0
@@ -33,14 +33,14 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
   }
 
   protected cut(next) {
-    const file = this.ctx?.file
+    const file = this._ctx?.file
     if (!file) {
       this.handleFileReaderError()
     }
-    else if (this.ctx) {
-      const start = this.bytesPerChunk * this.fileChunk + this.ctx.startBlob
+    else if (this._ctx) {
+      const start = this.bytesPerChunk * this.fileChunk + this._ctx.startBlob
       const end = Math.min(file.size, start + this.bytesPerChunk)
-      this.fileReader[this.ctx.type](file.slice(start, end))
+      this.fileReader[this._ctx.type](file.slice(start, end))
       if (!this.fileReader.onload) {
         const handleLoad = () => {
           next(() => {
@@ -95,8 +95,8 @@ class FileRead extends Task<FileReadParams, FileReadCtx> {
   }
 
   private handleFileReaderLoad() {
-    if (this.ctx?.callback && this.ctx?.file && this.fileReader.result !== null) {
-      this.ctx.callback(this.fileReader.result, this.readProgress, this.ctx?.file)
+    if (this._ctx?.callback && this._ctx?.file && this.fileReader.result !== null) {
+      this._ctx.callback(this.fileReader.result, this.readProgress, this._ctx?.file)
     }
   }
 
