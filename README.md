@@ -5,7 +5,7 @@
 
 [@abmao/task](https://www.npmjs.com/package/@abmao/task)提供核心 __Task__ 抽象，并基于此实现了部分任务功能
 
-[文档](https://hengshanmwc.github.io/task/docs/.vitepress/dist/index.html)
+[文档](https://hengshanmwc.github.io/task/docs/dist/index.html)
 
 ## 引用
 ```

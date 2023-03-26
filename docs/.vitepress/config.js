@@ -3,6 +3,7 @@ export default defineConfig({
   title: 'Task',
   description: '用 Task 构建世界',
   base: '/',
+  outDir: 'dist',
   themeConfig: {
     siteTitle: 'Task',
     sidebar: [
