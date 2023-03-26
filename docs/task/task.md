@@ -1,8 +1,9 @@
 # Task
 task的核心抽象类，业务通过继承该类实现对应场景逻辑
 
-## API
-Task类型
+
+## 使用
+- ### 类型
 ```ts
 declare abstract class Task<T = any, Ctx = T> extends CurrentPromise implements BaseTask<T> {
     status: TaskStatus;
@@ -23,7 +24,7 @@ declare abstract class Task<T = any, Ctx = T> extends CurrentPromise implements 
     protected interceptCancel(params?: T): boolean | void;
 }
 ```
-基本使用
+- ### 基本使用
 ```TS
 import { Task } from '@abmao/task'
 
@@ -43,6 +44,7 @@ class TestTask extends Task<number, number> {
 
 const task = new TestTask()
 ```
+## API
 ### status
 属性：任务的状态，整个任务的生命周期分为四种状态，__idle__ 、__active__、__pause__、__end__
 - #### 详细信息
@@ -81,13 +83,26 @@ const task = new TestTask()
 方法：任务分片，需要实现的抽象方法
 
 - #### 详细信息
-通过参数next进行调度，用于对整个任务进行细颗粒度处理
+通过参数next进行调度，用于对整个任务进行细颗粒度处理。实现逻辑请传回调函数到next处理。
+```ts
+cut (next) {
+  next(() => {
+    // 代码逻辑
+  })
+  return this
+}
+
+```
+- #### next类型
+```TS
+type Next<T = Task> = (param?: NextParam) => T;
+```
 
 ### cutter
 方法 cut 方法包装调用
 
 - #### 详细信息
-内部添加了对于cut的catch逻辑
+内部添加了cut的错误处理
 ### createCtx
 方法：创建ctx方法
 
