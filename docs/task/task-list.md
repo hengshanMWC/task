@@ -134,4 +134,15 @@ taskList.setMaxSync(2) // 并发为2
 taskList.setMaxSync(-1) // 并发为0
 ```
 
-
+### move
+方法：移动任务位置
+- #### 详细信息
+将任务移动到目标任务之前
+- #### 示例
+```TS
+taskList.reset() // 重置所有任务
+taskList.reset(1) // 重置下标1的任务
+taskList.reset([1, 2]) // 重置下标1和2的任务
+taskList.reset(task) // 重置task
+taskList.reset([task, task2]) // 重置task和task2
+```
