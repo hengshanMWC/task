@@ -164,11 +164,13 @@ describe('on', () => {
   test('onError', async () => {
     let error: Error
     const catchCallback = vi.fn()
-    const errorCallback = vi.fn((err: Error, task: Task, _taskList: TaskList) => {
-      expect(err.message).toBe(error.message)
-      expect(task).toBe(tasks[0])
-      expect(taskList).toBe(_taskList)
-    })
+    const errorCallback = vi.fn(
+      (err: Error, task: Task, _taskList: TaskList) => {
+        expect(err.message).toBe(error.message)
+        expect(task).toBe(tasks[0])
+        expect(taskList).toBe(_taskList)
+      },
+    )
     const tasks = createAlarmClockList()
     const taskList = new TaskList(tasks)
     taskList.onParams(() => {
@@ -198,5 +200,7 @@ describe('on', () => {
 })
 
 function createAlarmClockList(num = 1) {
-  return Array(num).fill(1).map((item, index) => new TestTask())
+  return Array(num)
+    .fill(1)
+    .map((item, index) => new TestTask())
 }

@@ -12,7 +12,7 @@ interface BaseTask<T = any> {
 
 class CurrentPromise<T = any> {
   protected currentPromise?: Promise<T>
-  protected currentResolve?: CurrentResolve<this> | undefined
+  protected currentResolve?: CurrentResolve<T> | undefined
   protected currentReject?: CurrentReject | undefined
 
   protected triggerReject(err: Error) {
@@ -21,7 +21,7 @@ class CurrentPromise<T = any> {
     return this
   }
 
-  protected triggerResolve(value: this) {
+  protected triggerResolve(value: T) {
     this.currentResolve?.(value)
     this.currentResolve = undefined
     return this
