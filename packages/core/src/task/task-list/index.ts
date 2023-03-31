@@ -91,13 +91,12 @@ class TaskList extends Task<TaskListParams, TaskListCtx> {
     let targetIndex = getIndex(list, targetValue || 0)
     // 判断是正常的index
     if (
-      originIndex !== -1
-      && targetIndex !== -1
-      && originIndex < list.length
-      && targetIndex < list.length) {
+      originIndex >= 0
+      && targetIndex >= 0
+      && originIndex < list.length) {
       const originTask = list.splice(originIndex, 1)[0]
       targetIndex = getIndex(list, targetValue || 0)
-      list.splice(targetIndex, 0, originTask)
+      list.splice(Math.min(targetIndex, list.length), 0, originTask)
     }
     return this
   }
